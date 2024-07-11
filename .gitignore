@@ -1,2 +1,6 @@
 /.vs
+/.xmake
+/.idea
 /out
+/build
+/cmake-*

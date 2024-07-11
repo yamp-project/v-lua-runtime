@@ -12,3 +12,20 @@ else()
 	set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/build/win64/${CMAKE_BUILD_TYPE})
 	# set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MD")
 endif()
+
+set(LUAU_BUILD_CLI OFF)
+set(LUAU_BUILD_TESTS OFF)
+set(LUAU_BUILD_WEB OFF)
+set(LUAU_WERROR OFF)
+set(LUAU_STATIC_CRT OFF)
+#set(LUAU_EXTERN_C ON)
+
+add_subdirectory("./vendors/v-sdk")
+add_subdirectory("./vendors/luau")
+
+file(GLOB_RECURSE PROJECT_SOURCE_FILES "./src/*.h" "./src/*.hpp" "./src/*.cpp")
+
+include_directories("./src")
+
+add_library(${PROJECT_NAME} SHARED ${PROJECT_SOURCE_FILES})
+target_link_libraries(${PROJECT_NAME} PUBLIC Luau.Compiler Luau.VM yamp::sdk)
