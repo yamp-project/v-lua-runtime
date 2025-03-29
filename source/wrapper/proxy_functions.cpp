@@ -1,4 +1,4 @@
-#include <wrapper/ProxyFunctions.h>
+#include <wrapper/proxy_functions.h>
 
 #include <assert.h>
 

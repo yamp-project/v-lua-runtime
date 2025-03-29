@@ -5,7 +5,7 @@
 
 #include <lua.h>
 
-#include <wrapper/TypeTraits.h>
+#include <wrapper/type_traits.h>
 
 #define CHECK_TYPE_AND_INDEX(state, type, index) \
     if(index > lua_gettop(state)) return std::nullopt; \

@@ -1,9 +1,10 @@
-cmake_minimum_required (VERSION 3.8)
-
+cmake_minimum_required (VERSION 3.28)
 project ("v-lua-runtime")
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+set(CMAKE_GENERATOR "Ninja" CACHE INTERNAL "" FORCE)
 
 option(LUA_BUILD_EXE "Make executable for testing purposes" ON)
 
@@ -29,7 +30,7 @@ set(LUAU_WERROR OFF)
 set(LUAU_STATIC_CRT OFF)
 #set(LUAU_EXTERN_C ON)
 
-add_subdirectory("./vendors/v-sdk")
+add_subdirectory("./vendors/c-sdk")
 add_subdirectory("./vendors/luau")
 
 file(GLOB_RECURSE PROJECT_SOURCE_FILES "./source/*.h" "./source/*.hpp" "./source/*.cpp")

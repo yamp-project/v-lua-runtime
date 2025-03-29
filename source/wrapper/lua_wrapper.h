@@ -11,10 +11,10 @@
 #include <lualib.h>
 #include <luacode.h>
 
-#include <wrapper/Utils.h>
-#include <wrapper/ProxyFunctions.h>
-#include <wrapper/Values.h>
-#include <wrapper/TypeTraits.h>
+#include <wrapper/utils.h>
+#include <wrapper/proxy_functions.h>
+#include <wrapper/values.h>
+#include <wrapper/type_traits.h>
 
 namespace lua
 {

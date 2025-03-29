@@ -4,7 +4,7 @@
 #include <filesystem>
 #include <string>
 
-#include <v-sdk/resource.h>
+#include <c-sdk/resource.h>
 
 namespace lua
 {

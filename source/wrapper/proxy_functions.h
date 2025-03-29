@@ -1,8 +1,8 @@
 #pragma once
 
-#include <wrapper/TypeTraits.h>
-#include <wrapper/Values.h>
-#include <wrapper/Utils.h>
+#include <wrapper/type_traits.h>
+#include <wrapper/values.h>
+#include <wrapper/utils.h>
 
 #include <lua.h>
 #include <lualib.h>

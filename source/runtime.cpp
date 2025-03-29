@@ -1,8 +1,8 @@
-#include "Runtime.h"
-#include "Resource.h"
+#include "runtime.h"
+#include "resource.h"
 
-#include <v-sdk/resource.h>
-#include <v-sdk/lookup_table.h>
+#include <c-sdk/resource.h>
+#include <c-sdk/lookup_table.h>
 
 lua::Runtime::Runtime()
 {

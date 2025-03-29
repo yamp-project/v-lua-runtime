@@ -1,9 +1,9 @@
-#include <v-sdk/lookup_table.h>
+#include <c-sdk/lookup_table.h>
 
-#include "Resource.h"
-#include "Runtime.h"
+#include "resource.h"
+#include "runtime.h"
 
-#include <v-sdk/resource.h>
+#include <c-sdk/resource.h>
 
 lua::Resource::Resource(SdkResource* resource) :
     m_Runtime(lua::Runtime::GetInstance())

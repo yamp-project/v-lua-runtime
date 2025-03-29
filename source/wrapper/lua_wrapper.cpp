@@ -1,4 +1,4 @@
-#include <wrapper/LuaWrapper.h>
+#include <wrapper/lua_wrapper.h>
 
 #include <iostream>
 #include <fstream>

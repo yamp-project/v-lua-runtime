@@ -3,8 +3,8 @@
 
 #include <vector>
 
-#include <v-sdk/resource.h>
-#include <v-sdk/lookup_table.h>
+#include <c-sdk/resource.h>
+#include <c-sdk/lookup_table.h>
 
 namespace lua
 {

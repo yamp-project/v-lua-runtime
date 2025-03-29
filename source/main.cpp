@@ -1,10 +1,10 @@
 #include <iostream>
 #include <vector>
 
-#include <v-sdk/sdk.h>
+#include <c-sdk/sdk.h>
 
-#include <Runtime.h>
-#include <wrapper/LuaWrapper.h>
+#include <runtime.h>
+#include <wrapper/lua_wrapper.h>
 
 #pragma comment(lib, "D:\\Projects\\C\\yamp-project\\yamp\\cmake-build-debug\\client\\yamp_client.lib")
 
