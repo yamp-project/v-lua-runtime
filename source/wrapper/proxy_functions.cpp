@@ -33,16 +33,11 @@ int lua::Proxy::CApiClassIndex(lua_State* L)
 
     if (lua_iscfunction(L, -1))
     {
-        printf("FOUND THE GETTER!\n");
-
         lua_pushvalue(L, 1);
         lua_call(L, 1, 1);
 
-        Utils::lua_stacktrace(L, "CApiClassIndexGetter");
-        return 0;
+        return 1;
     }
-
-    Utils::lua_stacktrace(L, "CApiClassIndex");
 
     return 0;
 }

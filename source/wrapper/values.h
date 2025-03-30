@@ -120,6 +120,24 @@ namespace lua
         }
     };
 
+    template<>
+    struct Value<lua_CFunction>
+    {
+        static inline void Read(lua_State* state, int index)
+        {
+            //printf("Read function\n");
+        }
+
+        static inline void Push(lua_State* state, lua_CFunction value)
+        {
+            lua_pushcfunction(state, value, "Push::lua_CFunction");
+            //printf("Push function\n");
+            //lua_pushlightuserdata(state, value);
+            //lua_pushcclosure(state, Proxy, "Value<function>", 1);
+        }
+    };
+
+
     template<typename ReturnType, typename... Args>
     struct Value<ReturnType(*)(Args...)>
     {
@@ -131,7 +149,7 @@ namespace lua
             int index = 0;
             realFunction(Value<type_t<Args>>::Read(state, sizeof...(Args) - index++)...);
 
-            printf("Proxy function has been called!\n");
+            //printf("Proxy function has been called!\n");
             return 0;
         }
 
