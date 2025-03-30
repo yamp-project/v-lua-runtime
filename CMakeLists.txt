@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_GENERATOR "Ninja" CACHE INTERNAL "" FORCE)
 
-option(LUA_BUILD_EXE "Make executable for testing purposes" ON)
+option(LUA_BUILD_EXE "Make executable for testing purposes" OFF)
 
 message(STATUS LUA_BUILD_EXE)
 
