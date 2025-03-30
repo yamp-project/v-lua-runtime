@@ -3,8 +3,13 @@
 
 #include <vector>
 
+extern "C"
+{
 #include <c-sdk/resource.h>
 #include <c-sdk/lookup_table.h>
+};
+
+#include "logger.h"
 
 namespace lua
 {
@@ -18,7 +23,17 @@ namespace lua
             return &runtimeInstance;
         }
 
-        void SetLookupTable(SdkLookupTable* lookupTable) { m_LookupTable = lookupTable; }
+        void Initialize(SdkLookupTable* lookupTable)
+        {
+            SetLookupTable(lookupTable);
+            m_Logger = lua::Logger::Get("lua::Runtime");
+        }
+
+        void SetLookupTable(SdkLookupTable* lookupTable)
+        {
+            m_LookupTable = lookupTable;
+        }
+
         SdkLookupTable* GetLookupTable() { return m_LookupTable; }
 
         void OnStart();
@@ -32,6 +47,8 @@ namespace lua
     private:
         Runtime();
         ~Runtime() = default;
+
+        lua::Logger* m_Logger = nullptr;
 
         SdkLookupTable* m_LookupTable = nullptr;
         std::vector<lua::Resource*> m_Resources;
