@@ -1,46 +1,40 @@
 #include "runtime.h"
 #include "resource.h"
 
-extern "C"
+namespace lua
 {
-#include <c-sdk/resource.h>
-#include <c-sdk/lookup_table.h>
-}
+    bool lua::Init()
+    {
+        Runtime::GetInstance()->GetLogger()->Info("Runtime::Init");
+        return true;
+    }
 
-lua::Runtime::Runtime()
-{
+    void Shutdown()
+    {
+        Runtime::GetInstance()->GetLogger()->Info("Runtime::Shutdown");
+    }
+    
+    void OnResourceStart(IResource* resource)
+    {
+        Runtime* runtime = Runtime::GetInstance();
+        Resource* luaResource = new Resource(runtime->GetLookupTable(), resource);
+        luaResource->OnStart();
+    
+        runtime->GetLogger()->Debug("Runtime::OnResourceStart - %s", resource->GetName());
+    }
+    
+    void OnResourceStop(IResource* resource)
+    {
+        Runtime::GetInstance()->GetLogger()->Debug("Runtime::OnResourceStop");
+    }
 
-}
+    void OnTick()
+    {
+        //
+    }
 
-void lua::Runtime::OnStart()
-{
-    m_Logger->Info("Runtime::OnStart");
-}
-
-void lua::Runtime::OnStop()
-{
-
-}
-
-void lua::Runtime::OnTick()
-{
-
-}
-
-bool lua::Runtime::OnResourceStart(SdkResource* resource)
-{
-    lua::Resource* luaResource = new lua::Resource(m_LookupTable, resource);
-    luaResource->OnStart();
-
-    return true;
-}
-
-bool lua::Runtime::OnResourceStop(SdkResource* resource)
-{
-    return true;
-}
-
-void lua::Runtime::OnResourceTick(SdkResource* resource)
-{
-
+    void OnEvent(void* event)
+    {
+        Runtime::GetInstance()->GetLogger()->Debug("ScriptRuntime::OnEvent");
+    }
 }

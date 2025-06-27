@@ -1,58 +1,59 @@
-#ifndef SOURCE_RUNTIME_H
-#define SOURCE_RUNTIME_H
+#pragma once
 
 #include <vector>
-
-extern "C"
-{
-#include <c-sdk/resource.h>
-#include <c-sdk/lookup_table.h>
-};
+#include <assert.h>
 
 #include "logger.h"
 
 namespace lua
 {
+    bool Init();
+    void Shutdown();
+
+    void OnResourceStart(IResource* resource);
+    void OnResourceStop(IResource* resource);
+    void OnTick();
+    void OnEvent(void* event);
+
     class Resource;
     class Runtime
     {
     public:
+        // TODO: opt-in for a more dynamic singleton style
         static Runtime* GetInstance()
         {
             static Runtime runtimeInstance;
             return &runtimeInstance;
         }
 
-        void Initialize(SdkLookupTable* lookupTable)
+        Runtime(): m_LookupTable(nullptr), m_Resources()
         {
-            SetLookupTable(lookupTable);
-            m_Logger = lua::Logger::Get("lua::Runtime");
+            //
         }
 
-        void SetLookupTable(SdkLookupTable* lookupTable)
+        void SetLookupTable(ILookupTable* lookupTable)
         {
+            assert(m_LookupTable == nullptr);
             m_LookupTable = lookupTable;
+            m_Logger = std::make_unique<Logger>(m_LookupTable, "lua");
         }
 
-        SdkLookupTable* GetLookupTable() { return m_LookupTable; }
+        ILookupTable* GetLookupTable() {
+            assert(m_LookupTable != nullptr);
+            return m_LookupTable;
+        }
 
-        void OnStart();
-        void OnStop();
-        void OnTick();
-
-        bool OnResourceStart(SdkResource* resource);
-        bool OnResourceStop(SdkResource* resource);
-        void OnResourceTick(SdkResource* resource);
+        Logger* GetLogger()
+        {
+            return m_Logger.get();
+        }
 
     private:
-        Runtime();
         ~Runtime() = default;
 
-        lua::Logger* m_Logger = nullptr;
+        ILookupTable* m_LookupTable;
 
-        SdkLookupTable* m_LookupTable = nullptr;
-        std::vector<lua::Resource*> m_Resources;
+        std::vector<Resource*> m_Resources;
+        std::unique_ptr<Logger> m_Logger;
     };
 }
-
-#endif //SOURCE_RUNTIME_H

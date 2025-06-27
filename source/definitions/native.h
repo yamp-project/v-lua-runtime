@@ -9,6 +9,7 @@ namespace lua::Definitions
     public:
         using IDefinition::IDefinition;
 
-        void Initialize() override;
+        // void Initialize() override;
+        void Initialize() {};
     };
 }

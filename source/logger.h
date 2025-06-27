@@ -2,48 +2,39 @@
 
 extern "C"
 {
-#include <c-sdk/lookup_table.h>
+    #include <yamp-sdk/sdk.h>
 }
 
-namespace lua
+#include <stdarg.h>
+#include <sstream>
+
+#define IMPLEMENT_LOG(name)                                                                                                                 \
+    template <typename... Args>                                                                                                             \
+    void name(std::string_view fmt, Args&&... args)                                                                                         \
+    {                                                                                                                                       \
+        m_LookupTable->Log##name(m_Prefix.empty() ? fmt.data() : std::format("{} {}", m_Prefix, fmt).c_str(), std::forward<Args>(args)...); \
+    }
+
+class Logger
 {
-    class Logger
+public:
+
+    Logger(ILookupTable* lookupTable): m_LookupTable(lookupTable)
     {
-    public:
-        static Logger* Get(const char* name)
-        {
-            if(m_LookupTable)
-                return new Logger(m_LookupTable->SdkLogger__Create(name));
+        //
+    }
 
-            return new Logger(nullptr);
-        }
+    Logger(ILookupTable* lookupTable, const std::string& prefix): m_LookupTable(lookupTable), m_Prefix(prefix)
+    {
+        //
+    }
 
-#define IMPLEMENT_LOGGER(logFunction) \
-        template<typename... Args> \
-        void logFunction(const char* fmt, Args&&... args) \
-        {                             \
-            if(m_LookupTable && m_Logger)                          \
-                m_LookupTable->SdkLogger__##logFunction(m_Logger, fmt, std::forward<Args>(args)...); \
-            else                      \
-                printf(fmt, std::forward<Args>(args)...);\
-        }
+    IMPLEMENT_LOG(Debug);
+    IMPLEMENT_LOG(Info);
+    IMPLEMENT_LOG(Warn);
+    IMPLEMENT_LOG(Error);
 
-        IMPLEMENT_LOGGER(Info);
-        IMPLEMENT_LOGGER(Debug);
-        IMPLEMENT_LOGGER(Warning);
-        IMPLEMENT_LOGGER(Error);
-        IMPLEMENT_LOGGER(Trace);
-
-        static void Initialise(SdkLookupTable* lookupTable)
-        {
-            if(!m_LookupTable)
-                m_LookupTable = lookupTable;
-        }
-
-    private:
-        Logger(SdkLogger* logger) : m_Logger(logger) { };
-
-        SdkLogger* m_Logger = nullptr;
-        inline static SdkLookupTable* m_LookupTable = nullptr;
-    };
-}
+private:
+    ILookupTable* m_LookupTable;
+    std::string m_Prefix;
+};

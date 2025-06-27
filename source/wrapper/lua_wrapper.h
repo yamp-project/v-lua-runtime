@@ -214,7 +214,7 @@ namespace lua
     private:
         std::string m_ResourceName = "";
         lua_State* m_State = nullptr;
-        lua::Logger* m_Logger = nullptr;
+        // lua::Logger* m_Logger = nullptr;
 
         std::deque<std::string> m_NamespaceQueue;
         std::deque<std::string> m_ClassMetaTableQueue;

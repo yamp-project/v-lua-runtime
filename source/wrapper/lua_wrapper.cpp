@@ -8,7 +8,7 @@ using namespace lua;
 State::State(std::string resourceName)
 {
     m_ResourceName = resourceName;
-    m_Logger = lua::Logger::Get("lua::State");
+    // m_Logger = lua::Logger::Get("lua::State");
     m_State = luaL_newstate();
     luaL_openlibs(m_State);
 }
@@ -35,15 +35,16 @@ void State::RunFile(std::string filePathStr, std::string relativePathStr)
     std::filesystem::path relativePath = std::filesystem::relative(filePath, basePath);
     if(!std::filesystem::exists(filePath))
     {
-        m_Logger->Error("File was not found: %s", filePathStr.c_str());
+        printf("File was not found: %s\n", filePathStr.c_str());
+        // m_Logger->Error("File was not found: %s", filePathStr.c_str());
         return;
     }
 
-    m_Logger->Info("Main file exists! %s", filePath.string().c_str());
+    // m_Logger->Info("Main file exists! %s", filePath.string().c_str());
     std::ifstream mainFileStream(filePath);
 
     std::string content((std::istreambuf_iterator<char>(mainFileStream)), (std::istreambuf_iterator<char>()));
-    m_Logger->Info("Content: %lld", content.size());
+    printf("Content: %lld\n%s\n", content.size(), content.c_str());
 
     size_t bytecodeSize = 0;
 
@@ -57,12 +58,14 @@ void State::RunFile(std::string filePathStr, std::string relativePathStr)
         {
             if(lua_isstring(m_State, -1)) {
                 const char* str = lua_tostring(m_State, -1);
-                m_Logger->Error("Error happened while running: %s\n", str);
+                printf("Error happened while running: %s\n", str);
+                // m_Logger->Error("Error happened while running: %s\n", str);
             }
         }
     }
 
-    m_Logger->Info("Result: %d", result);
+    printf("Result: %d\n", result);
+    // m_Logger->Info("Result: %d", result);
 
     lua_close(m_State);
 }

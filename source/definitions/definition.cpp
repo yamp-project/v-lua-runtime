@@ -2,7 +2,7 @@
 #include "runtime.h"
 #include "wrapper/lua_wrapper.h"
 
-#include <c-sdk/lookup_table.h>
+#include <yamp-sdk/lookup_table.h>
 
 lua::Definitions::IDefinition::IDefinition(lua::State* state) :
     m_State(state),

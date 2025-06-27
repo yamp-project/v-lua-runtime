@@ -1,6 +1,6 @@
 #pragma once
 
-#include <c-sdk/lookup_table.h>
+#include <yamp-sdk/lookup_table.h>
 
 namespace lua
 {
@@ -21,6 +21,6 @@ namespace lua::Definitions
         IDefinition(lua::State* state);
 
         lua::State* m_State = nullptr;
-        SdkLookupTable* m_LookupTable = nullptr;
+        ILookupTable* m_LookupTable = nullptr;
     };
 }
