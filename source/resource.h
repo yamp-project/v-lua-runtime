@@ -1,24 +1,20 @@
 #pragma once
 
-#include <vector>
-
 extern "C"
 {
     #include <yamp-sdk/sdk.h>
 };
 
 #include "definitions/definition.h"
+#include "wrapper/lua_wrapper.h"
 #include "logger.h"
+
+#include <vector>
 
 namespace lua
 {
-    class State;
-    class Runtime;
-
     class Resource
     {
-        friend class Runtime;
-
     public:
         void OnStart();
         void OnStop();
@@ -27,18 +23,17 @@ namespace lua
         template<typename T> requires std::is_base_of_v<lua::Definitions::IDefinition, T>
         void RegisterDefinition()
         {
-            // TODO: remove this raw heap allocation
-            m_Definitions.push_back(new T(m_State.get()));
+            m_Definitions.emplace_back(std::make_unique<T>(&m_State));
         }
 
-        Resource(ILookupTable* lookupTable, IResource *resource);
+        Resource(ILookupTable* lookupTable, IResource* resource);
+        ~Resource() = default;
 
     private:
-        ~Resource() = default;
         IResource* m_Resource;
+        Logger m_Logger;
+        State m_State;
 
-        std::unique_ptr<Logger> m_Logger;
-        std::unique_ptr<State> m_State;
-        std::vector<Definitions::IDefinition*> m_Definitions;
+        std::vector<std::unique_ptr<Definitions::IDefinition>> m_Definitions;
     };
 }
