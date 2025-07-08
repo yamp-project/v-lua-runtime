@@ -19,6 +19,7 @@ namespace lua
         void OnStart();
         void OnStop();
         void OnTick();
+        void OnEvent();
 
         template<typename T> requires std::is_base_of_v<lua::Definitions::IDefinition, T>
         void RegisterDefinition()

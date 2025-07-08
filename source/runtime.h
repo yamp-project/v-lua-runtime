@@ -1,9 +1,10 @@
 #pragma once
 
-#include <vector>
+#include <unordered_map>
 #include <assert.h>
 
 #include "logger.h"
+#include "resource.h"
 
 namespace lua
 {
@@ -13,47 +14,36 @@ namespace lua
     void OnResourceStart(IResource* resource);
     void OnResourceStop(IResource* resource);
     void OnTick();
-    void OnEvent(void* event);
+    void OnEvent(CoreEvent event);
 
     class Resource;
     class Runtime
     {
     public:
-        // TODO: opt-in for a more dynamic singleton style
-        static Runtime* GetInstance()
-        {
-            static Runtime runtimeInstance;
-            return &runtimeInstance;
-        }
+        static Runtime* GetInstance();
+        static Runtime* Initialize(ILookupTable* lookupTable);
+        static void Shutdown();
 
-        Runtime(): m_LookupTable(nullptr), m_Resources()
-        {
-            //
-        }
+        Runtime(ILookupTable* lookupTable);
+        ~Runtime() = default;
 
-        void SetLookupTable(ILookupTable* lookupTable)
-        {
-            assert(m_LookupTable == nullptr);
-            m_LookupTable = lookupTable;
-            m_Logger = std::make_unique<Logger>(m_LookupTable, "lua");
-        }
+        void CreateResource(IResource* resource);
 
         ILookupTable* GetLookupTable() {
-            assert(m_LookupTable != nullptr);
             return m_LookupTable;
         }
 
         Logger* GetLogger()
         {
-            return m_Logger.get();
+            return &m_Logger;
         }
 
-    private:
-        ~Runtime() = default;
+    // private:
+        static std::unique_ptr<Runtime> s_Runtime;
 
         ILookupTable* m_LookupTable;
+        Logger m_Logger;
 
-        std::vector<Resource*> m_Resources;
-        std::unique_ptr<Logger> m_Logger;
+        std::unordered_map<IResource*, std::unique_ptr<Resource>> m_Resources;
     };
 }
