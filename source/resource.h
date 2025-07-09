@@ -12,6 +12,9 @@ namespace lua
     class Resource
     {
     public:
+        void RegisterCallbackRef(std::string_view identifier, int32_t ref);
+        std::vector<int32_t>* GetCallbackRef(std::string_view identifier);
+
         void RegisterCoreCallbackRef(int32_t identifier, int32_t ref);
         std::vector<int32_t>* GetCoreCallbackRef(int32_t identifier);
 
@@ -40,6 +43,7 @@ namespace lua
         State m_State;
 
         std::vector<std::unique_ptr<Definitions::IDefinition>> m_Definitions;
+        std::unordered_map<std::string, std::vector<int32_t>> m_CallbackRefs;
         std::unordered_map<int32_t, std::vector<int32_t>> m_CoreCallbackRefs;
     };
 }

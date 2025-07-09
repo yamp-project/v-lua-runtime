@@ -89,6 +89,22 @@ namespace lua
         RegisterDefinition<lua::Definitions::Native>();
     }
 
+    void Resource::RegisterCallbackRef(std::string_view identifier, int32_t ref)
+    {
+        m_CallbackRefs[identifier.data()].push_back(ref);
+    }
+
+    std::vector<int32_t>* Resource::GetCallbackRef(std::string_view identifier)
+    {
+        auto it = m_CallbackRefs.find(identifier.data());
+        if (it == m_CallbackRefs.end())
+        {
+            return nullptr;
+        }
+
+        return &it->second;
+    }
+
     void Resource::RegisterCoreCallbackRef(int32_t identifier, int32_t ref)
     {
         m_CoreCallbackRefs[identifier].push_back(ref);
@@ -96,12 +112,13 @@ namespace lua
 
     std::vector<int32_t>* Resource::GetCoreCallbackRef(int32_t identifier)
     {
-        if (!m_CoreCallbackRefs.contains(identifier))
+        auto it = m_CoreCallbackRefs.find(identifier);
+        if (it == m_CoreCallbackRefs.end())
         {
             return nullptr;
         }
 
-        return &m_CoreCallbackRefs[identifier];
+        return &it->second;
     }
 
     void Resource::OnStart()
