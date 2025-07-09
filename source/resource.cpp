@@ -9,55 +9,55 @@
 #include <iostream>
 #include <fstream>
 
-LUALIB_API int luaL_ref (lua_State *L, int t) {
-  int ref;
-  if (lua_isnil(L, -1)) {
-    lua_pop(L, 1);  /* remove from stack */
-    return LUA_REFNIL;  /* 'nil' has a unique fixed reference */
-  }
-  t = lua_absindex(L, t);
-  if (lua_rawgeti(L, t, 1) == LUA_TNUMBER)  /* already initialized? */
-    ref = (int)lua_tointeger(L, -1);  /* ref = t[1] */
-  else {  /* first access */
-    lua_toboolean(L, -1);  /* must be nil or false */
-    ref = 0;  /* list is empty */
-    lua_pushinteger(L, 0);  /* initialize as an empty list */
-    lua_rawseti(L, t, 1);  /* ref = t[1] = 0 */
-  }
-  lua_pop(L, 1);  /* remove element from stack */
-  if (ref != 0) {  /* any free element? */
-    lua_rawgeti(L, t, ref);  /* remove it from list */
-    lua_rawseti(L, t, 1);  /* (t[1] = t[ref]) */
-  }
-  else  /* no free elements */
-    ref = (int)lua_rawlen(L, t) + 1;  /* get a new reference */
-  lua_rawseti(L, t, ref);
-  return ref;
+int luaL_ref(lua_State* L, int t)
+{
+    assert(t == LUA_REGISTRYINDEX);
+    int r = lua_ref(L, -1);
+    lua_pop(L, 1);
+    return r;
 }
 
 namespace lua
 {
-    int lua_callback_ref = LUA_REFNIL;
-    int register_callback(lua_State* L) {
-        if (!lua_isfunction(L, 1)) {
+    int RegisterEvent(lua_State* L) {
+        if (!lua_isstring(L, 1)) {
+            luaL_error(L, "Expected an event name");
+            return 1;
+        }
+
+        if (!lua_isfunction(L, 2)) {
             luaL_error(L, "Expected a function");
             return 1;
         }
 
-        printf("1\n");
-        lua_pushvalue(L, -1);
-        lua_callback_ref = lua_ref(L, -1);
-        lua::Utils::lua_stacktrace(L, "test");
-        printf("2\n");
+        Resource* resource = Runtime::GetInstance()->GetStateResource(L);
+        resource->RegisterCallbackRef(lua_tostring(L, 1), luaL_ref(L, LUA_REGISTRYINDEX));
+
         return 0;
     }
 
-    void call_lua_callback(lua_State* L) {
-        lua_rawgeti(L, LUA_REGISTRYINDEX, lua_callback_ref);
+    void CallLuaEvent(Resource* resource, CoreEvent& event) {
+        lua_State* L = resource->GetState();
 
-        if (lua_pcall(L, 0, 0, 0) != LUA_OK) {
-            std::cerr << "Error calling Lua callback: " << lua_tostring(L, -1) << "\n";
-            lua_pop(L, 1);
+        // TODO: maybe the callback identifier should not be strings
+        // either way make it depend on the actual core event, and maybe
+        // "events" in general
+        auto refs =  resource->GetCallbackRef("weaponFire");
+        if (refs)
+        {
+            for (int32_t ref : *refs)
+            {
+                lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
+                for (size_t i = 0; i < event.args->size; ++i)
+                {
+                    utils::PushAnyValueToStack(L, event.args->buffer[i]);
+                }
+
+                if (lua_pcall(L, 2, 0, 0) != LUA_OK) {
+                    std::cerr << "Error calling Lua callback: " << lua_tostring(L, -1) << "\n";
+                    lua_pop(L, 1);
+                }
+            }
         }
     }
 
@@ -85,6 +85,21 @@ namespace lua
         RegisterDefinition<lua::Definitions::Native>();
     }
 
+    void Resource::RegisterCallbackRef(std::string_view identifier, int32_t ref)
+    {
+        m_CallbackRefs[identifier.data()].push_back(ref);
+    }
+
+    std::vector<int32_t>* Resource::GetCallbackRef(std::string_view identifier)
+    {
+        if (!m_CallbackRefs.contains(identifier.data()))
+        {
+            return nullptr;
+        }
+
+        return &m_CallbackRefs[identifier.data()];
+    }
+
     void Resource::OnStart()
     {
         std::filesystem::path resourcePath = m_Resource->resourcePath;
@@ -100,8 +115,7 @@ namespace lua
         m_State.GetGlobalNamespace();
         m_State.RegisterCFunction("print", l_my_print);
             m_State.BeginNamespace("yamp");
-                m_State.RegisterVariable("side", "client");
-                m_State.RegisterCFunction("cb", register_callback);
+                m_State.RegisterCFunction("on", RegisterEvent);
             m_State.EndNamespace();
         m_State.EndNamespace();
 
@@ -124,9 +138,8 @@ namespace lua
         //
     }
 
-    void Resource::OnEvent()
+    void Resource::OnEvent(CoreEvent& event)
     {
-        printf("from resource %p\n", m_State.GetState());
-        call_lua_callback(m_State.GetState());
+        CallLuaEvent(this, event);
     }
 } // namespace lua

@@ -66,6 +66,5 @@ void State::RunFile(std::string filePathStr, std::string relativePathStr)
 
     printf("Result: %d\n", result);
     // m_Logger->Info("Result: %d", result);
-
-    lua_close(m_State);
+    // lua_close(m_State);
 }

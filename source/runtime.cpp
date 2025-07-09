@@ -16,16 +16,22 @@ namespace lua
         Runtime::GetInstance()->GetLogger()->Info("Runtime::Shutdown");
     }
     
-    void OnResourceStart(IResource* resource)
+    void OnResourceStart(IResource* iResource)
     {
         Runtime* runtime = Runtime::GetInstance();
-        runtime->m_Resources[resource] = std::make_unique<Resource>(runtime->GetLookupTable(), resource);
-        runtime->m_Resources[resource]->OnStart();
+        if (runtime->m_Resources.contains(iResource))
+        {
+            runtime->m_Resources[iResource]->OnStart();
+            return;    
+        }
 
-        runtime->GetLogger()->Debug("Runtime::OnResourceStart - %s", resource->name);
+        Resource* resource = runtime->CreateResource(iResource);
+        resource->OnStart();
+
+        runtime->GetLogger()->Debug("Runtime::OnResourceStart - %s", iResource->name);
     }
     
-    void OnResourceStop(IResource* resource)
+    void OnResourceStop(IResource* iResource)
     {
         Runtime::GetInstance()->GetLogger()->Debug("Runtime::OnResourceStop");
     }
@@ -39,24 +45,9 @@ namespace lua
     {
         Runtime::GetInstance()->GetLogger()->Debug("ScriptRuntime::OnEvent %d", event.type);
 
-        for (size_t i = 0; i < event.args->size; ++i)
-        {
-            CAnyValue* value = event.args->buffer[i];
-            switch ((CType)value->type)
-            {
-            case CType::C_INT_32:
-                printf("arg[%zu]: %d\n", i, ValueAs<int32_t>(value));
-                break;
-
-            default:
-                break;
-            }
-        }
-
         for (const auto& it : Runtime::GetInstance()->m_Resources)
         {
-            printf("calling ???\n");
-            it.second->OnEvent();
+            it.second->OnEvent(event);
         }
     }
 
@@ -89,14 +80,18 @@ namespace lua
         //
     }
 
-    void Runtime::CreateResource(IResource* resource)
+    Resource* Runtime::CreateResource(IResource* iResource)
     {
-        if (m_Resources.contains(resource))
+        if (m_Resources.contains(iResource))
         {
-            m_Logger.Error("The resource %s already exists", resource->name);
-            return;
+            m_Logger.Error("The resource %s already exists", iResource->name);
+            return m_Resources[iResource].get();
         }
 
-        m_Resources[resource] = std::make_unique<Resource>(m_LookupTable, resource);
+        m_Resources[iResource] = std::make_unique<Resource>(m_LookupTable, iResource);
+        Resource* resource = m_Resources[iResource].get();
+        m_States[resource->GetState()] = resource;
+
+        return resource;
     }
 }

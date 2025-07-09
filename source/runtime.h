@@ -11,8 +11,8 @@ namespace lua
     bool Init();
     void Shutdown();
 
-    void OnResourceStart(IResource* resource);
-    void OnResourceStop(IResource* resource);
+    void OnResourceStart(IResource* iResource);
+    void OnResourceStop(IResource* iResource);
     void OnTick();
     void OnEvent(CoreEvent event);
 
@@ -27,7 +27,7 @@ namespace lua
         Runtime(ILookupTable* lookupTable);
         ~Runtime() = default;
 
-        void CreateResource(IResource* resource);
+        Resource* CreateResource(IResource* iResource);
 
         ILookupTable* GetLookupTable() {
             return m_LookupTable;
@@ -38,6 +38,11 @@ namespace lua
             return &m_Logger;
         }
 
+        Resource* GetStateResource(lua_State* state)
+        {
+            return m_States[state];
+        }
+
     // private:
         static std::unique_ptr<Runtime> s_Runtime;
 
@@ -45,5 +50,6 @@ namespace lua
         Logger m_Logger;
 
         std::unordered_map<IResource*, std::unique_ptr<Resource>> m_Resources;
+        std::unordered_map<lua_State*, Resource*> m_States;
     };
 }
