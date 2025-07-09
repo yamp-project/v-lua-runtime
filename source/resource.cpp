@@ -91,7 +91,7 @@ namespace lua
 
     void Resource::RegisterCallbackRef(std::string_view identifier, int32_t ref)
     {
-        m_CallbackRefs[identifier.data()].push_back(ref);
+        m_CallbackRefs[std::string(identifier)].push_back(ref);
     }
 
     std::vector<int32_t>* Resource::GetCallbackRef(std::string_view identifier)
