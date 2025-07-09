@@ -1,8 +1,4 @@
-extern "C"
-{
-    #include <yamp-sdk/sdk.h>
-}
-
+#include <yamp-sdk/sdk.h>
 #include "runtime.h"
 
 IRuntimeContext GetRuntimeContext()
