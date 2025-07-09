@@ -30,19 +30,24 @@ namespace lua
             return 1;
         }
 
-        Resource* resource = Runtime::GetInstance()->GetStateResource(L);
-        resource->RegisterCallbackRef(lua_tostring(L, 1), luaL_ref(L, LUA_REGISTRYINDEX));
+        Runtime* runtime = Runtime::GetInstance();
+        
+        std::optional<CoreEventType> eventType = runtime->GetCoreEventType(lua_tostring(L, 1));
+        if (!eventType)
+        {
+            luaL_error(L, "Unknown event type");
+            return 1;
+        }
 
+        Resource* resource = runtime->GetResource(L);
+        resource->RegisterCoreCallbackRef(*eventType, luaL_ref(L, LUA_REGISTRYINDEX));
         return 0;
     }
 
     void CallLuaEvent(Resource* resource, CoreEvent& event) {
         lua_State* L = resource->GetState();
 
-        // TODO: maybe the callback identifier should not be strings
-        // either way make it depend on the actual core event, and maybe
-        // "events" in general
-        auto refs =  resource->GetCallbackRef("weaponFire");
+        auto refs = resource->GetCoreCallbackRef(event.type);
         if (refs)
         {
             for (int32_t ref : *refs)
@@ -63,7 +68,6 @@ namespace lua
 
     int l_my_print(lua_State* L)
     {
-        Logger* logger = Runtime::GetInstance()->GetLogger();
         std::string strBuilder = "";
     
         int nargs = lua_gettop(L);
@@ -73,7 +77,7 @@ namespace lua
             lua_pop(L, 1);
         }
 
-        logger->Info(strBuilder.c_str());
+        Runtime::GetInstance()->GetLogger().Info(strBuilder.c_str());
         return 0;
     }
 
@@ -85,19 +89,19 @@ namespace lua
         RegisterDefinition<lua::Definitions::Native>();
     }
 
-    void Resource::RegisterCallbackRef(std::string_view identifier, int32_t ref)
+    void Resource::RegisterCoreCallbackRef(int32_t identifier, int32_t ref)
     {
-        m_CallbackRefs[identifier.data()].push_back(ref);
+        m_CoreCallbackRefs[identifier].push_back(ref);
     }
 
-    std::vector<int32_t>* Resource::GetCallbackRef(std::string_view identifier)
+    std::vector<int32_t>* Resource::GetCoreCallbackRef(int32_t identifier)
     {
-        if (!m_CallbackRefs.contains(identifier.data()))
+        if (!m_CoreCallbackRefs.contains(identifier))
         {
             return nullptr;
         }
 
-        return &m_CallbackRefs[identifier.data()];
+        return &m_CoreCallbackRefs[identifier];
     }
 
     void Resource::OnStart()

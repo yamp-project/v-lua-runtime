@@ -1,9 +1,6 @@
 #pragma once
 
-extern "C"
-{
-    #include <yamp-sdk/sdk.h>
-}
+#include <yamp-sdk/sdk.h>
 
 #include <stdarg.h>
 #include <sstream>

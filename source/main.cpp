@@ -26,5 +26,5 @@ IRuntimeContext GetRuntimeContext()
 SDK_EXPORT void RuntimeEntry(RegisterRuntime registerRuntime)
 {
     lua::Runtime* runtime = lua::Runtime::Initialize(registerRuntime("lua", GetRuntimeContext()));
-    runtime->GetLogger()->Info("runtime registered with success!");
+    runtime->GetLogger().Info("runtime registered with success!");
 }

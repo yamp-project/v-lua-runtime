@@ -24,32 +24,29 @@ namespace lua
         static Runtime* Initialize(ILookupTable* lookupTable);
         static void Shutdown();
 
+        using Resources = std::unordered_map<IResource*, std::unique_ptr<Resource>>;
+
         Runtime(ILookupTable* lookupTable);
         ~Runtime() = default;
 
+        ILookupTable* GetLookupTable() { return m_LookupTable; }
+        Resources& GetResources() { return m_Resources; }
+        Logger& GetLogger() { return m_Logger; }
+        
         Resource* CreateResource(IResource* iResource);
+        Resource* GetResource(IResource* iResource);
+        Resource* GetResource(lua_State* state);
 
-        ILookupTable* GetLookupTable() {
-            return m_LookupTable;
-        }
+        std::optional<CoreEventType> GetCoreEventType(const char* eventName);
 
-        Logger* GetLogger()
-        {
-            return &m_Logger;
-        }
-
-        Resource* GetStateResource(lua_State* state)
-        {
-            return m_States[state];
-        }
-
-    // private:
+    private:
         static std::unique_ptr<Runtime> s_Runtime;
 
         ILookupTable* m_LookupTable;
+        Resources m_Resources;
         Logger m_Logger;
 
-        std::unordered_map<IResource*, std::unique_ptr<Resource>> m_Resources;
-        std::unordered_map<lua_State*, Resource*> m_States;
+        std::unordered_map<std::string, CoreEventType> m_CoreEventMapping;
+        std::unordered_map<lua_State*, Resource*> m_ResourceMapping;
     };
 }
