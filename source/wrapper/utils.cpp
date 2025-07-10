@@ -6,8 +6,8 @@
 #include <lua.h>
 #include <lualib.h>
 #include <assert.h>
-#include <print>
 #include <string>
+#include <format>
 
 void lua::utils::lua_dumptable(lua_State* L, int idx, int level)
 {
@@ -28,14 +28,14 @@ void lua::utils::lua_dumptable(lua_State* L, int idx, int level)
             bool isRepetEqual = lua_equal(L, -1, -2);
             if (isRepetEqual)
             {
-                std::print("{}{} => RepeatTable\n", levelTab, tableName);
+                printf("%s\n", std::format("{}{} => RepeatTable", levelTab, tableName).c_str());
                 lua_pop(L, 1);
             }
             else
             {
                 // make it beautifully aligned
-                std::print("{}{} => Table\n", levelTab, tableName);
-                std::print("{}{{\n", levelTab);
+                printf("%s\n", std::format("{}{} => Table", levelTab, tableName).c_str());
+                printf("%s\n", std::format("{}{{", levelTab).c_str());
 
                 lua_pop(L, 1);
 
@@ -46,7 +46,7 @@ void lua::utils::lua_dumptable(lua_State* L, int idx, int level)
                 }
 
                 // make it beautifuly aligned
-                std::print("{}}}\n", levelTab);
+                printf("%s\n", std::format("{}}}", levelTab).c_str());
             }
         }
         else
@@ -54,7 +54,7 @@ void lua::utils::lua_dumptable(lua_State* L, int idx, int level)
             // note: lua_tostring will crash if userdata doesn't have any __tostring metaevent implemented
             std::string stackKey(lua_isstring(L, -1) ? lua_tostring(L, -1) : lua_typename(L, lua_type(L, -1)));
             std::string stackValue(lua_isstring(L, -2) ? lua_tostring(L, -2) : lua_typename(L, lua_type(L, -2)));
-            std::print("{}{} => {},\n", levelTab, stackKey, stackValue);
+            printf("%s\n", std::format("{}{} => {},", levelTab, stackKey, stackValue).c_str());
         }
 
         lua_pop(L, 2);
@@ -64,7 +64,7 @@ void lua::utils::lua_dumptable(lua_State* L, int idx, int level)
 void lua::utils::lua_stacktrace(lua_State* L, const char* stackName)
 {
     int stackTop = lua_gettop(L);
-    std::print(" --------- Stack Begins: {}---------\n", std::string(stackName));
+    printf("%s\n", std::format(" --------- Stack Begins: {}---------\n", std::string(stackName)).c_str());
 
     for (int i = stackTop; i >= 1; i--)
     {
@@ -74,21 +74,21 @@ void lua::utils::lua_stacktrace(lua_State* L, const char* stackName)
         switch (valueType)
         {
         case LUA_TFUNCTION:
-            std::print("\tAbsolute: {} ~~ Relative: {} ~~\t Value: 'function'\n", std::to_string(i), std::to_string(relativePosition));
+            printf("%s\n", std::format("\tAbsolute: {} ~~ Relative: {} ~~\t Value: 'function'", std::to_string(i), std::to_string(relativePosition)).c_str());
             break;
         case LUA_TSTRING:
-            std::print("\tAbsolute: {} ~~ Relative: {} ~~\t Value: '{}'\n", std::to_string(i), std::to_string(relativePosition), luaL_checkstring(L, i));
+            printf("%s\n", std::format("\tAbsolute: {} ~~ Relative: {} ~~\t Value: '{}'", std::to_string(i), std::to_string(relativePosition), luaL_checkstring(L, i)).c_str());
             break;
         case LUA_TBOOLEAN:
-            std::print("\tAbsolute: {} ~~ Relative: {} ~~\t Value: '{}'\n", std::to_string(i), std::to_string(relativePosition), (lua_toboolean(L, i) ? ("true") : ("false")));
+            printf("%s\n", std::format("\tAbsolute: {} ~~ Relative: {} ~~\t Value: '{}'", std::to_string(i), std::to_string(relativePosition), (lua_toboolean(L, i) ? ("true") : ("false"))).c_str());
             break;
         case LUA_TNUMBER:
-            std::print("\tAbsolute: {} ~~ Relative: {} ~~\t Value: '{}'\n", std::to_string(i), std::to_string(relativePosition), std::to_string(luaL_checknumber(L, i)));
+            printf("%s\n", std::format("\tAbsolute: {} ~~ Relative: {} ~~\t Value: '{}'", std::to_string(i), std::to_string(relativePosition), std::to_string(luaL_checknumber(L, i))).c_str());
             break;
         case LUA_TTABLE:
         {
-            std::print("\tAbsolute: {} ~~ Relative: {} ~~\t Value '{}'\n", std::to_string(i), std::to_string(relativePosition), lua_typename(L, valueType));
-            std::print("\t{{\n");
+            printf("%s\n", std::format("\tAbsolute: {} ~~ Relative: {} ~~\t Value '{}'", std::to_string(i), std::to_string(relativePosition), lua_typename(L, valueType)).c_str());
+            printf("\t{{\n");
 
             // check if the table is the same as the global
             lua_getglobal(L, "_G");
@@ -97,14 +97,14 @@ void lua::utils::lua_stacktrace(lua_State* L, const char* stackName)
 
             if (isGlobalTable)
             {
-                std::print("\t\t_G => GlobalTable\n");
+                printf("\t\t_G => GlobalTable\n");
             }
             else
             {
                 lua_dumptable(L, i, 2);
             }
 
-            std::print("\t}}\n");
+            printf("\t}}\n");
             /*lua_pushnil(L);
             while (lua_next(L, i) != 0)
             {
@@ -115,12 +115,12 @@ void lua::utils::lua_stacktrace(lua_State* L, const char* stackName)
             break;
         }
         default:
-            std::print("\tAbsolute: {} ~~ Relative: {} ~~\t Value type: {}\n", i, relativePosition, lua_typename(L, valueType));
+            printf("%s\n", std::format("\tAbsolute: {} ~~ Relative: {} ~~\t Value type: {}", i, relativePosition, lua_typename(L, valueType)).c_str());
             break;
         }
     }
 
-    std::print(" --------- Stack Ends: {} ---------\n", stackName);
+    printf("%s\n", std::format(" --------- Stack Ends: {} ---------", stackName).c_str());
 }
 
 int lua::utils::traceback(lua_State* L) {

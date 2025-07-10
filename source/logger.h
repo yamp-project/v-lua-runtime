@@ -4,6 +4,7 @@
 
 #include <stdarg.h>
 #include <sstream>
+#include <format>
 
 #define IMPLEMENT_LOG(name)                                                                                                                 \
     template <typename... Args>                                                                                                             \

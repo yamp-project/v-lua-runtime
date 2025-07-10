@@ -5,13 +5,13 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_GENERATOR "Ninja" CACHE INTERNAL "" FORCE)
+set(CMAKE_VERBOSE_MAKEFILE OFF)
 
 option(LUA_BUILD_EXE "Make executable for testing purposes" OFF)
 
 message(STATUS LUA_BUILD_EXE)
 
 if(LUA_BUILD_EXE)
-    message(STATUS "IT IS FUCKING ON")
     add_definitions(-DLUA_BUILD_EXE)
 endif()
 
@@ -23,11 +23,11 @@ else()
     # set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MD")
 endif()
 
-set(LUAU_BUILD_CLI OFF)
 set(LUAU_BUILD_TESTS OFF)
+set(LUAU_STATIC_CRT OFF)
+set(LUAU_BUILD_CLI OFF)
 set(LUAU_BUILD_WEB OFF)
 set(LUAU_WERROR OFF)
-set(LUAU_STATIC_CRT OFF)
 #set(LUAU_EXTERN_C ON)
 
 add_subdirectory("./vendors/yamp-sdk")
@@ -42,7 +42,7 @@ if(LUA_BUILD_EXE)
 else()
     add_library(${PROJECT_NAME} SHARED ${PROJECT_SOURCE_FILES})
 endif()
+
 target_link_libraries(${PROJECT_NAME} PUBLIC
-        Luau.Compiler Luau.VM
-        yamp::sdk
+    Luau.Compiler Luau.VM yamp::sdk
 )
