@@ -160,6 +160,15 @@ namespace lua
             m_NamespaceQueue.pop_back();
         }
 
+        void RegisterVariable(std::string key)
+        {
+            assert(lua_gettop(m_State) >= 2 && "Not enough value pushed onto the stack to register a variable!");
+            if (lua_istable(m_State, -2))
+            {
+                lua_setfield(m_State, -2, key.c_str());
+            }
+        }
+
         template<typename T>
         void RegisterVariable(std::string key, T value)
         {
@@ -203,6 +212,22 @@ namespace lua
         void Push(T value)
         {
             Value<T>::Push(m_State, std::forward<T>(value));
+        }
+
+        template<typename T>
+        void PushObject(T value, std::string className)
+        {
+            //lua_pushlightuserdata(m_State, value);
+            *static_cast<T*>(lua_newuserdata(m_State, sizeof(void*))) = value;
+            luaL_getmetatable(m_State, className.c_str());
+
+            if (lua_isnil(m_State, -1))
+                return;
+
+            utils::lua_stacktrace(m_State, "PushObject");
+            lua_setmetatable(m_State, -2);
+            utils::lua_stacktrace(m_State, "PushObject2");
+            printf("Pushing pointer value\n");
         }
 
 //        template<typename T>
