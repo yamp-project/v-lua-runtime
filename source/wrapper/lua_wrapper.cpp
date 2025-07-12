@@ -50,17 +50,22 @@ void State::RunFile(std::string filePathStr, std::string relativePathStr)
 
     std::string bytecode = Luau::compile(content);
     int result = luau_load(m_State, std::format("@{}:{}", m_ResourceName, relativePath.string()).c_str(), bytecode.c_str(), bytecodeSize, 0);
+    bool error = (bool)result;
 
-    if(!result)
+    if(!error)
     {
         auto status = lua_resume(m_State, NULL, 0);
-        if (status != 0)
+        error = (status != 0);
+    }
+
+    if(error)
+    {
+        assert(lua_gettop(m_State) >= 1 && "Unable to retrieve the actual error messages!");
+
+        if(lua_isstring(m_State, -1))
         {
-            if(lua_isstring(m_State, -1)) {
-                const char* str = lua_tostring(m_State, -1);
-                printf("Error happened while running: %s\n", str);
-                // m_Logger->Error("Error happened while running: %s\n", str);
-            }
+            const char* str = lua_tostring(m_State, -1);
+            printf("Error happened while running: %s\n", str);
         }
     }
 
