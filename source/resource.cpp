@@ -204,7 +204,7 @@ namespace lua
                     m_State.MemberVariable("name", +[](Resource* resource){ return resource->m_Resource->name; });
                     m_State.MemberVariable("resourcePath", +[](Resource* resource){ return resource->m_Resource->resourcePath; });
                     m_State.MemberVariable("resourceMainFile", +[](Resource* resource){ return resource->m_Resource->resourceMainFile; });
-                    m_State.MemberFunction("on", +[](Resource* resource, const char* eventName) { printf("%p - %s - %p\n", resource, eventName); });
+                    m_State.MemberFunction("on", +[](Resource* resource, const char* eventName) { printf("%p - %s\n", resource, eventName); });
                 }
                 m_State.EndClass();
 
