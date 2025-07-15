@@ -14,7 +14,8 @@ namespace lua
     void OnResourceStart(IResource* iResource);
     void OnResourceStop(IResource* iResource);
     void OnTick();
-    void OnEvent(CoreEvent event);
+    void OnCoreEvent(CoreEventType eventType, CAnyArray* args);
+    void OnResourceEvent(const char* eventName, CAnyArray* args);
 
     class Resource;
     class Runtime

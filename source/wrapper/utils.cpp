@@ -1,6 +1,6 @@
 #include "utils.h"
 
-#include <yamp-sdk/any_value.h>
+#include <yamp-sdk/sdk.h>
 #include <yamp-sdk/cpp/any_value.h>
 
 #include <lua.h>
@@ -207,4 +207,27 @@ void lua::utils::PushAnyValueToStack(lua_State* L, CAnyValue* value)
         printf("PushAnyValueToStack type (%d) not handled", value->type);
         break;
     }
+}
+
+CAnyValue* lua::utils::MakeAnyValue(AnyValueFactory* valueFactory, lua_State *L, int32_t index)
+{
+    switch (lua_type(L, index))
+    {
+    case lua_Type::LUA_TNIL:
+        return valueFactory->MakeNullValue();
+
+    case lua_Type::LUA_TBOOLEAN:
+        return valueFactory->MakeBoolValue(lua_toboolean(L, index));
+
+    case lua_Type::LUA_TNUMBER:
+        return valueFactory->MakeDoubleValue(lua_tonumber(L, index));
+
+    case lua_Type::LUA_TSTRING:
+        return valueFactory->MakeStringValue(lua_tostring(L, index));
+
+    default:
+        break;
+    }
+
+    return nullptr;
 }

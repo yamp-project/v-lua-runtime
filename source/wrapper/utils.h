@@ -1,7 +1,10 @@
 #pragma once
 
+struct AnyValueFactory;
 struct lua_State;
 struct CAnyValue;
+
+#include <cstdint>
 
 namespace lua::utils
 {
@@ -10,4 +13,5 @@ namespace lua::utils
 
     int traceback(lua_State* L);
     void PushAnyValueToStack(lua_State* L, CAnyValue* value);
+    CAnyValue* MakeAnyValue(AnyValueFactory* valueFactory, lua_State *L, int32_t index);
 }

@@ -19,7 +19,7 @@ int luaL_ref(lua_State* L, int t)
 
 namespace lua
 {
-    int RegisterEvent(lua_State* L) {
+    int32_t RegisterCoreEvent(lua_State* L) {
         if (!lua_isstring(L, 1)) {
             luaL_error(L, "Expected an event name");
             return 1;
@@ -44,21 +44,82 @@ namespace lua
         return 0;
     }
 
-    void CallLuaEvent(Resource* resource, CoreEvent& event) {
+    int32_t RegisterResourceEvent(lua_State* L)
+    {
+        if (!lua_isstring(L, 1)) {
+            luaL_error(L, "Expected an event name");
+            return 1;
+        }
+
+        if (!lua_isfunction(L, 2)) {
+            luaL_error(L, "Expected a function");
+            return 1;
+        }
+
+        Runtime* runtime = Runtime::GetInstance();
+        Resource* resource = runtime->GetResource(L);
+        resource->RegisterCallbackRef(lua_tostring(L, 1), luaL_ref(L, LUA_REGISTRYINDEX));
+
+        return 0;
+    }
+
+    static int32_t C_Emit(lua_State *L) {
+        Runtime* runtime = Runtime::GetInstance();
+        ILookupTable* lookupTable = runtime->GetLookupTable();
+        Resource* resource = runtime->GetResource(L);
+        const char* eventName = lua_tostring(L, 1);
+
+        int n = lua_gettop(L); // number of arguments
+        CAnyArray* array = lookupTable->valueFactory->MakeAnyArrayValue(n);
+
+        for (int i = 2; i <= n; i++) {
+            array->buffer[i] = lua::utils::MakeAnyValue(lookupTable->valueFactory, L, i);
+        }
+
+        lookupTable->EmitResourceEvent(eventName, array);
+        return 0;
+    }
+
+    void CallCoreEvent(Resource* resource, CoreEventType eventType, CAnyArray* args) {
         lua_State* L = resource->GetState();
 
-        auto refs = resource->GetCoreCallbackRef(event.type);
+        auto refs = resource->GetCoreCallbackRef(eventType);
         if (refs)
         {
             for (int32_t ref : *refs)
             {
                 lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
-                for (size_t i = 0; i < event.args->size; ++i)
+                for (size_t i = 0; i < args->size; ++i)
                 {
-                    utils::PushAnyValueToStack(L, event.args->buffer[i]);
+                    utils::PushAnyValueToStack(L, args->buffer[i]);
                 }
 
                 if (lua_pcall(L, 2, 0, 0) != LUA_OK) {
+                    std::cerr << "Error calling Lua callback: " << lua_tostring(L, -1) << "\n";
+                    lua_pop(L, 1);
+                }
+            }
+        }
+    }
+
+    void CallResourceEvent(Resource* resource, std::string_view eventName) {
+        lua_State* L = resource->GetState();
+
+        auto refs = resource->GetCallbackRef(eventName);
+        if (refs)
+        {
+            for (int32_t ref : *refs)
+            {
+                lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
+
+                lua_createtable(L, 1, 2);
+                lua_pushstring(L, "value");
+                lua_setfield(L, -2, "key");
+
+                lua_pushstring(L, "u42");
+                lua_setfield(L, -2, "__type");
+
+                if (lua_pcall(L, 1, 0, 0) != LUA_OK) {
                     std::cerr << "Error calling Lua callback: " << lua_tostring(L, -1) << "\n";
                     lua_pop(L, 1);
                 }
@@ -134,9 +195,27 @@ namespace lua
         }
 
         m_State.GetGlobalNamespace();
-        m_State.RegisterCFunction("print", l_my_print);
+            m_State.RegisterCFunction("print", l_my_print);
+
             m_State.BeginNamespace("yamp");
-                m_State.RegisterCFunction("on", RegisterEvent);
+            {
+                m_State.BeginClass("resource");
+                {
+                    m_State.MemberVariable("name", +[](Resource* resource){ return resource->m_Resource->name; });
+                    m_State.MemberVariable("resourcePath", +[](Resource* resource){ return resource->m_Resource->resourcePath; });
+                    m_State.MemberVariable("resourceMainFile", +[](Resource* resource){ return resource->m_Resource->resourceMainFile; });
+                    m_State.MemberFunction("on", +[](Resource* resource, const char* eventName) { printf("%p - %s - %p\n", resource, eventName); });
+                }
+                m_State.EndClass();
+
+                m_State.PushObject(this, "resource");
+                m_State.RegisterVariable("resource");
+            }
+
+            // m_State.RegisterCFunction("on", RegisterCoreEvent);
+            // m_State.RegisterCFunction("onResource", RegisterResourceEvent);
+            // m_State.RegisterCFunction("emit", C_Emit);
+
             m_State.EndNamespace();
         m_State.EndNamespace();
 
@@ -159,8 +238,13 @@ namespace lua
         //
     }
 
-    void Resource::OnEvent(CoreEvent& event)
+    void Resource::OnCoreEvent(CoreEventType eventType, CAnyArray* args)
     {
-        CallLuaEvent(this, event);
+        CallCoreEvent(this, eventType, args);
+    }
+
+    void Resource::OnResourceEvent(const char* eventName, CAnyArray* args)
+    {
+        CallResourceEvent(this, eventName);
     }
 } // namespace lua

@@ -15,7 +15,8 @@ IRuntimeContext GetRuntimeContext()
         .OnResourceStart = lua::OnResourceStart,
         .OnResourceStop  = lua::OnResourceStop,
         .OnTick          = lua::OnTick,
-        .OnEvent         = lua::OnEvent
+        .OnCoreEvent     = lua::OnCoreEvent,
+        .OnResourceEvent = lua::OnResourceEvent
     };
 }
 
@@ -60,8 +61,10 @@ int main(int argc, char** argv)
             test.PushObject(&resource, "resource");
             test.RegisterVariable("thisResource");
         }
+
         test.EndNamespace();
     }
+
     test.EndNamespace();
     test.RunFile("test.lua");
 

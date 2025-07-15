@@ -42,14 +42,25 @@ namespace lua
         //
     }
 
-    void OnEvent(CoreEvent event)
+    void OnCoreEvent(CoreEventType eventType, CAnyArray* args)
     {
         Runtime* runtime = Runtime::GetInstance();
-        runtime->GetLogger().Debug("ScriptRuntime::OnEvent %d", event.type);
+        runtime->GetLogger().Debug("ScriptRuntime::OnEvent %d", eventType);
 
         for (const auto& it : runtime->GetResources())
         {
-            it.second->OnEvent(event);
+            it.second->OnCoreEvent(eventType, args);
+        }
+    }
+
+    void OnResourceEvent(const char* eventName, CAnyArray* args)
+    {
+        Runtime* runtime = Runtime::GetInstance();
+        runtime->GetLogger().Debug("ScriptRuntime::OnEvent %s", eventName);
+
+        for (const auto& it : runtime->GetResources())
+        {
+            it.second->OnResourceEvent(eventName, args);
         }
     }
 
