@@ -7,6 +7,9 @@
 #include <lua.h>
 #include <lualib.h>
 
+#include <tuple>
+#include <type_traits>
+
 namespace lua
 {
     struct Proxy
@@ -49,15 +52,23 @@ namespace lua
             MemberFunction memberFunction = (MemberFunction)lua_tolightuserdata(L, lua_upvalueindex(2));
 
             Class* instance = *static_cast<Class**>(luaL_checkudata(L, 1, className));
-            size_t argumentIndex = 2;
+            size_t argumentIndex = 0;
 
-            if constexpr (!std::is_same_v<ReturnType, void>)
+            if constexpr((sizeof...(Args) == 1) && std::is_same_v<std::tuple_element_t<0, std::tuple<Args...>>, lua_State*>)
             {
-                Value<ReturnType>::Push(L, memberFunction(instance, Value<type_t<Args>>::Read(L, argumentIndex++).value()...));
+                memberFunction(instance, L);
+                return 0;
             }
             else
             {
-                memberFunction(instance, Value<type_t<Args>>::Read(L, argumentIndex++).value()...);
+                if constexpr (!std::is_same_v<ReturnType, void>)
+                {
+                    Value<ReturnType>::Push(L, memberFunction(instance, Value<Args>::Read(L, (lua_gettop(L) - argumentIndex++)).value()...));
+                }
+                else
+                {
+                    memberFunction(instance, Value<Args>::Read(L, (lua_gettop(L) - argumentIndex++)).value()...);
+                }
             }
 
             return 0;

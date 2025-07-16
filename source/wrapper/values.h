@@ -6,6 +6,7 @@
 #include <lua.h>
 
 #include <wrapper/type_traits.h>
+#include <wrapper/utils.h>
 
 #define CHECK_TYPE_AND_INDEX(state, type, index) \
     if(index > lua_gettop(state)) return std::nullopt; \
@@ -13,6 +14,12 @@
 
 namespace lua
 {
+    struct FunctionRef
+    {
+        uint32_t m_Reference;
+        const void* m_Pointer;
+    };
+
     template<typename T>
     struct Value {};
 
@@ -121,6 +128,26 @@ namespace lua
     };
 
     template<>
+    struct Value<FunctionRef>
+    {
+        static inline std::optional<FunctionRef> Read(lua_State* state, int index)
+        {
+            CHECK_TYPE_AND_INDEX(state, LUA_TFUNCTION, index);
+
+            FunctionRef tmp;
+            tmp.m_Reference = lua_ref(state, index);
+            tmp.m_Pointer = lua_topointer(state, index);
+
+            return tmp;
+        }
+
+        static inline void Push(lua_State* state, FunctionRef value)
+        {
+            printf("Push FunctionRef\n");
+        }
+    };
+
+    template<>
     struct Value<lua_CFunction>
     {
         static inline void Read(lua_State* state, int index)
@@ -136,7 +163,6 @@ namespace lua
             //lua_pushcclosure(state, Proxy, "Value<function>", 1);
         }
     };
-
 
     template<typename ReturnType, typename... Args>
     struct Value<ReturnType(*)(Args...)>
