@@ -1,6 +1,7 @@
 #include <wrapper/proxy_functions.h>
 
 #include <assert.h>
+#include <format>
 
 int lua::Proxy::CApiClassIndex(lua_State* L)
 {
@@ -42,5 +43,27 @@ int lua::Proxy::CApiClassIndex(lua_State* L)
         return 1;
     }
 
+    return 0;
+}
+
+int lua::Proxy::CApiClassTostring(lua_State* L)
+{
+    assert(lua_isuserdata(L, 1) || lua_istable(L, 1));
+
+    lua_getmetatable(L, 1);
+    if (!lua_istable(L, -1))
+    {
+        lua_pushstring(L, "Unknown");
+        return 1;
+    }
+
+    lua_rawgetfield(L, -1, "__name");
+    if (lua_isstring(L, -1))
+    {
+        lua_pushstring(L, std::format("{} class", lua_tostring(L, -1)).c_str());
+        return 1;
+    }
+
+    lua_pushstring(L, "Unknown");
     return 0;
 }

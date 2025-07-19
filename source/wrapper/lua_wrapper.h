@@ -56,11 +56,17 @@ namespace lua
                 lua_pushcfunction(m_State, Proxy::CApiClassIndex, "__index");
                 lua_setfield(m_State, -2, "__index");
 
+                lua_pushcfunction(m_State, Proxy::CApiClassTostring, "__tostring");
+                lua_setfield(m_State, -2, "__tostring");
+
                 lua_newtable(m_State);
                 lua_setfield(m_State, -2, "__set");
 
                 lua_newtable(m_State);
                 lua_setfield(m_State, -2, "__get");
+
+                lua_pushstring(m_State, className.c_str());
+                lua_setfield(m_State, -2, "__name");
             }
 
             m_ClassMetaTableQueue.push_back(className);

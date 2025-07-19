@@ -15,6 +15,7 @@ namespace lua
     struct Proxy
     {
         static int CApiClassIndex(lua_State* L);
+        static int CApiClassTostring(lua_State* L);
 
         template<typename Class, typename... Args>
         static int CApiClassConstructor(lua_State* L)
