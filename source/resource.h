@@ -24,13 +24,12 @@ namespace lua
         void OnCoreEvent(CoreEventType eventType, CAnyArray* args);
         void OnResourceEvent(const char* eventName, CAnyArray* args);
 
-        template<typename T> requires std::is_base_of_v<lua::Definitions::IDefinition, T>
-        void RegisterDefinition()
+        State* GetState()
         {
-            m_Definitions.emplace_back(std::make_unique<T>(&m_State));
+            return &m_State;
         }
 
-        lua_State* GetState()
+        lua_State* GetLuaState()
         {
             return m_State.GetState();
         }
@@ -38,12 +37,12 @@ namespace lua
         Resource(ILookupTable* lookupTable, IResource* resource);
         ~Resource() = default;
 
-    private:
         IResource* m_Resource;
+
+    private:
         Logger m_Logger;
         State m_State;
 
-        std::vector<std::unique_ptr<Definitions::IDefinition>> m_Definitions;
         std::unordered_map<std::string, std::vector<int32_t>> m_CallbackRefs;
         std::unordered_map<int32_t, std::vector<int32_t>> m_CoreCallbackRefs;
     };
