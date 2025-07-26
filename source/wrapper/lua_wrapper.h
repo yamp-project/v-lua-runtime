@@ -230,9 +230,9 @@ namespace lua
             if (lua_isnil(m_State, -1))
                 return;
 
-            utils::lua_stacktrace(m_State, "PushObject");
+            //utils::lua_stacktrace(m_State, "PushObject");
             lua_setmetatable(m_State, -2);
-            utils::lua_stacktrace(m_State, "PushObject2");
+            //utils::lua_stacktrace(m_State, "PushObject2");
             printf("Pushing pointer value\n");
         }
 
