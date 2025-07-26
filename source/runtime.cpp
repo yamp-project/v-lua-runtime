@@ -77,12 +77,13 @@ namespace lua
         assert(s_Runtime == nullptr);
         s_Runtime = std::make_unique<Runtime>(lookupTable);
 
-        CoreEventMetas eventMetas = s_Runtime->GetLookupTable()->GetCoreEventMetas();
-        for (size_t i = 0; i < eventMetas.size; ++i)
-        {
-            CoreEventMeta& eventMeta = eventMetas.buffer[i];
-            s_Runtime->m_CoreEventMapping[::utils::StrToCamelCase(eventMeta.name)] = eventMeta.type;
-        }
+        // CoreEventMetas eventMetas = s_Runtime->GetLookupTable()->GetCoreEventMetas();
+        // printf("Runtime::Initialize2.1\n");
+        // for (size_t i = 0; i < eventMetas.size; ++i)
+        // {
+        //     CoreEventMeta& eventMeta = eventMetas.buffer[i];
+        //     s_Runtime->m_CoreEventMapping[::utils::StrToCamelCase(eventMeta.name)] = eventMeta.type;
+        // }
 
         return s_Runtime.get();
     }
@@ -107,7 +108,7 @@ namespace lua
         Resource* resource = resourcePtr.get();
 
         m_Resources[iResource] = std::move(resourcePtr);
-        m_ResourceMapping[resource->GetState()] = resource;
+        m_ResourceMapping[resource->GetLuaState()] = resource;
 
         return resource;
     }
