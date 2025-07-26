@@ -1,9 +1,6 @@
 [submodule "vendors/luau"]
 	path = vendors/luau
 	url = git@github.com:luau-lang/luau.git
-[submodule "vendors/c-sdk"]
-	path = vendors/c-sdk
-	url = git@github.com:yamp-project/c-sdk.git
 [submodule "vendors/yamp-sdk"]
 	path = vendors/yamp-sdk
 	url = git@github.com:yamp-project/sdk-poc.git
