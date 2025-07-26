@@ -13,20 +13,6 @@ namespace lua
 
 namespace lua
 {
-    class IDefinition
-    {
-        friend class lua::Resource;
-
-    public:
-        virtual void Initialize() = 0;
-
-        IDefinition(lua::State* state);
-    
-    protected:
-        lua::State* m_State = nullptr;
-        ILookupTable* m_LookupTable = nullptr;
-    };
-
     class StaticDefinition
     {
     public:
