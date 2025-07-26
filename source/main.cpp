@@ -22,6 +22,7 @@ IRuntimeContext GetRuntimeContext()
 
 SDK_EXPORT void RuntimeEntry(RegisterRuntime registerRuntime)
 {
+    printf("HHHKAJSHDKAJSHDKJAHSDKJAHSKJD3333333\n");
     lua::Runtime* runtime = lua::Runtime::Initialize(registerRuntime("lua", GetRuntimeContext()));
     runtime->GetLogger().Info("runtime registered with success!");
 }
@@ -47,15 +48,34 @@ int main(int argc, char** argv)
             test.BeginClass("resource");
             {
                 test.MemberVariable("name", +[](IResource* ptr){ return ptr->name; });
-                test.MemberVariable("resourcePath", +[](IResource* ptr){ return ptr->resourcePath; });
-                test.MemberVariable("resourceMainFile", +[](IResource* ptr){ return ptr->resourceMainFile; });
+                test.MemberVariable("resourcePath", +[](IResource* ptr){ return ptr->path; });
+                test.MemberVariable("resourceMainFile", +[](IResource* ptr){ return ptr->mainFile; });
+
+                // test.MemberFunction("testCb", +[](IResource* resource, lua_State* L)
+                // {
+                //     printf("This should print the state: %p\n", L);
+                //     lua::utils::lua_stacktrace(L, "testCb");
+                //     return 0;
+                // });
+
+                test.MemberFunction("testCb", +[](IResource* resource, const char* eventName, lua::FunctionRef shitTest)
+                {
+                    printf("Testing shit! %s, %d, %p\n", eventName, shitTest.m_Reference, shitTest.m_Pointer);
+                    //return 0;
+                });
+
+                test.RegisterCFunction("getByName", +[](lua_State *L)
+                {
+                    printf("getByName\n");
+                    return 0;
+                });
             }
             test.EndClass();
 
             IResource resource;
             resource.name = _strdup("Test resource name");
-            resource.resourcePath = _strdup("Test resource path");
-            resource.resourceMainFile = _strdup("Test resource main file");
+            resource.path = _strdup("Test resource path");
+            resource.mainFile = _strdup("Test resource main file");
             printf("Test shit: %p\n", &resource);
 
             test.PushObject(&resource, "resource");
