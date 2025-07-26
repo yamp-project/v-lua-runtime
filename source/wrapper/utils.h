@@ -1,4 +1,5 @@
 #pragma once
+#include <assert.h>
 
 struct AnyValueFactory;
 struct lua_State;
@@ -8,6 +9,7 @@ struct CAnyValue;
 
 namespace lua::utils
 {
+    int luaL_ref(lua_State* L, int t);
     void lua_dumptable(lua_State* L, int idx, int level);
     void lua_stacktrace(lua_State* L, const char* stackName);
 

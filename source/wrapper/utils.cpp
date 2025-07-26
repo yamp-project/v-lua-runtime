@@ -9,6 +9,14 @@
 #include <string>
 #include <format>
 
+int lua::utils::luaL_ref(lua_State* L, int t)
+{
+    assert(t == LUA_REGISTRYINDEX);
+    int r = lua_ref(L, -1);
+    lua_pop(L, 1);
+    return r;
+}
+
 void lua::utils::lua_dumptable(lua_State* L, int idx, int level)
 {
     std::string levelTab;
