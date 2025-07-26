@@ -4,7 +4,7 @@
 
 #include <yamp-sdk/lookup_table.h>
 
-lua::Definitions::IDefinition::IDefinition(lua::State* state) :
+lua::IDefinition::IDefinition(lua::State* state) :
     m_State(state),
     m_LookupTable(lua::Runtime::GetInstance()->GetLookupTable())
 {
