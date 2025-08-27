@@ -9,6 +9,8 @@
 #include "definition.h"
 #include "runtime.h"
 
+#include <algorithm>
+
 #pragma pack(push, 1)
 typedef struct
 {
