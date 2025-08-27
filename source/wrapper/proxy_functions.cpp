@@ -46,6 +46,37 @@ int lua::Proxy::CApiClassIndex(lua_State* L)
     return 0;
 }
 
+int lua::Proxy::CApiClassNewIndex(lua_State *L)
+{
+    //for latter reference: if an object instance is called the first value on the stack is userdata
+    //if the first value is a table we are possibly calling to access a static function from the metatable
+
+    assert(lua_isuserdata(L, 1) || lua_istable(L, 1));
+    lua_getmetatable(L, 1);
+
+    if (!lua_istable(L, -1))
+    {
+        printf("No metatable was found in the userdata!\n");
+        return 0;
+    }
+
+    lua_rawgetfield(L, -1, "__set");
+    lua_pushvalue(L, 2);
+    lua_rawget(L, -2);
+
+    if (lua_iscfunction(L, -1))
+    {
+        lua_pushvalue(L, 1);
+        lua_pushvalue(L, 3);
+        lua_call(L, 2, 0);
+
+        return 0;
+    }
+
+    return 0;
+}
+
+
 int lua::Proxy::CApiClassTostring(lua_State* L)
 {
     assert(lua_isuserdata(L, 1) || lua_istable(L, 1));

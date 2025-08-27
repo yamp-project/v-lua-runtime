@@ -15,6 +15,7 @@ namespace lua
     struct Proxy
     {
         static int CApiClassIndex(lua_State* L);
+        static int CApiClassNewIndex(lua_State* L);
         static int CApiClassTostring(lua_State* L);
 
         template<typename Class, typename... Args>
@@ -87,6 +88,25 @@ namespace lua
             Value<ReturnType>::Push(L, getterFunction(instance));
 
             return 1;
+        }
+
+        template<typename ReturnType, typename Class>
+        static int CApiClassMemberVariableSetter(lua_State* L)
+        {
+            typedef void(*SetterFunction)(Class*,ReturnType);
+
+            const char* className = lua_tostring(L, lua_upvalueindex(1));
+            SetterFunction setterFunction = (SetterFunction)lua_tolightuserdata(L, lua_upvalueindex(2));
+
+            Class* instance = *static_cast<Class**>(luaL_checkudata(L, 1, className));
+            if (setterFunction)
+            {
+                auto value = Value<ReturnType>::Read(L, 2);
+                if (value.has_value())
+                    setterFunction(instance, value.value());
+            }
+
+            return 0;
         }
     };
 }

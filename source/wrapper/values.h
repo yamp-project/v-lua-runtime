@@ -46,9 +46,6 @@ namespace lua
 
             int temp;
             Integer result = static_cast<Integer>(lua_tointegerx(state, index, &temp));
-
-            printf("Value<Integer>::Read3: %d\n", index);
-
             return (temp == 1) ? std::make_optional(result) : std::nullopt;
         }
 

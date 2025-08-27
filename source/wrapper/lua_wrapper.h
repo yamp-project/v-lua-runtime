@@ -56,6 +56,9 @@ namespace lua
                 lua_pushcfunction(m_State, Proxy::CApiClassIndex, "__index");
                 lua_setfield(m_State, -2, "__index");
 
+                lua_pushcfunction(m_State, Proxy::CApiClassNewIndex, "__newindex");
+                lua_setfield(m_State, -2, "__newindex");
+
                 lua_pushcfunction(m_State, Proxy::CApiClassTostring, "__tostring");
                 lua_setfield(m_State, -2, "__tostring");
 
@@ -85,7 +88,7 @@ namespace lua
         }
 
         template<typename ReturnType, typename ClassType>
-        void MemberVariable(std::string variableName, ReturnType(*getter)(ClassType*), void(*setter)(ClassType*, ReturnType) = nullptr)
+        void MemberVariable(std::string variableName, ReturnType(*getter)(ClassType*), void(*setter)(ClassType*,ReturnType) = nullptr)
         {
             lua_rawgetfield(m_State, -1, "__get");
 
@@ -96,6 +99,21 @@ namespace lua
             lua_setfield(m_State, -2, variableName.c_str());
 
             lua_pop(m_State, 1);
+
+            if (setter)
+            {
+                utils::lua_stacktrace(m_State, "MemberVariable::Setter");
+
+                lua_rawgetfield(m_State, -1, "__set");
+
+                std::string& classMetaTableName =  m_ClassMetaTableQueue.back();
+                lua_pushstring(m_State, classMetaTableName.c_str());
+                lua_pushlightuserdata(m_State, setter);
+                lua_pushcclosurek(m_State, Proxy::CApiClassMemberVariableSetter<ReturnType, ClassType>, "__get", 2, NULL);
+                lua_setfield(m_State, -2, variableName.c_str());
+
+                lua_pop(m_State, 1);
+            }
 
 //            return *this;
         }
