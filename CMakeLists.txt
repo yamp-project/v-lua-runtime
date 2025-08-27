@@ -23,11 +23,11 @@ else()
     # set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MD")
 endif()
 
-set(LUAU_BUILD_TESTS OFF)
-set(LUAU_STATIC_CRT OFF)
-set(LUAU_BUILD_CLI OFF)
-set(LUAU_BUILD_WEB OFF)
-set(LUAU_WERROR OFF)
+set(LUAU_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(LUAU_STATIC_CRT OFF CACHE BOOL "" FORCE)
+set(LUAU_BUILD_CLI OFF CACHE BOOL "" FORCE)
+set(LUAU_BUILD_WEB OFF CACHE BOOL "" FORCE)
+set(LUAU_WERROR OFF CACHE BOOL "" FORCE)
 #set(LUAU_EXTERN_C ON)
 
 add_subdirectory("./vendors/yamp-sdk")
@@ -35,7 +35,7 @@ add_subdirectory("./vendors/luau")
 
 file(GLOB_RECURSE PROJECT_SOURCE_FILES "./source/*.h" "./source/*.hpp" "./source/*.cpp")
 
-include_directories("./source", "./vendors")
+include_directories("./source" "./vendors")
 
 if(LUA_BUILD_EXE)
     add_executable(${PROJECT_NAME} ${PROJECT_SOURCE_FILES})
