@@ -45,6 +45,7 @@ namespace lua
             return 1;
         }
 
+        //multiple arguments
         template<typename ReturnType, typename Class, typename... Args>
         static int CApiClassMemberFunction(lua_State* L)
         {
@@ -56,23 +57,18 @@ namespace lua
             Class* instance = *static_cast<Class**>(luaL_checkudata(L, 1, className));
             size_t argumentIndex = 0;
 
-            if constexpr((sizeof...(Args) == 1) && std::is_same_v<std::tuple_element_t<0, std::tuple<Args...>>, lua_State*>)
+            if constexpr((sizeof...(Args) == 1))
+                if constexpr(std::is_same_v<std::tuple_element_t<0, std::tuple<Args...>>, lua_State*>)
+                    return memberFunction(instance, L);
+
+            auto callMemberFunction = [&]() { return memberFunction(instance, Value<Args>::Read(L, (lua_gettop(L) - argumentIndex++)).value()...); };
+            if constexpr (!std::is_same_v<ReturnType, void>)
             {
-                memberFunction(instance, L);
-                return 0;
-            }
-            else
-            {
-                if constexpr (!std::is_same_v<ReturnType, void>)
-                {
-                    Value<ReturnType>::Push(L, memberFunction(instance, Value<Args>::Read(L, (lua_gettop(L) - argumentIndex++)).value()...));
-                }
-                else
-                {
-                    memberFunction(instance, Value<Args>::Read(L, (lua_gettop(L) - argumentIndex++)).value()...);
-                }
+                Value<ReturnType>::Push(L, callMemberFunction());
+                return 1;
             }
 
+            callMemberFunction();
             return 0;
         }
 
