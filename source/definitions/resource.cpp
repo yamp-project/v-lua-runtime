@@ -1,11 +1,10 @@
-#include <wrapper/lua_wrapper.h>
-#include <yamp-sdk/sdk.h>
-
+#include "wrapper/lua_wrapper.h"
 #include "definition.h"
-
-#include <resource.h>
-
+#include "resource.h"
 #include "runtime.h"
+
+#include <yamp-sdk/sdk.h>
+#include <iomanip>
 
 int32_t RegisterCoreEvent(lua_State* L) {
         if (!lua_isstring(L, 1)) {
@@ -75,7 +74,7 @@ int32_t RegisterCoreEvent(lua_State* L) {
         int nargs = lua_gettop(L);
         for (int i = 1; i <= nargs; ++i)
         {
-            strBuilder.append(std::format("{}{}", (i == 1 ? "" : " "), luaL_tolstring(L, i, nullptr)));
+            strBuilder.append(i == 1 ? "" : " ").append(luaL_tolstring(L, i, nullptr));
             lua_pop(L, 1);
         }
 
@@ -93,6 +92,21 @@ static lua::StaticDefinition resourceClass([](lua::Resource* resource)
 
         state->BeginNamespace("yamp");
         {
+            state->BeginClass("Player");
+            {
+                state->MemberVariable("health", +[](lua::Resource* resource) {
+                    auto lt = resource->GetLookupTable();
+                    return lt->entityApi->GetHealth(lt->GetLocalPlayer());
+                }, +[](lua::Resource* resource, float health) {
+                    auto lt = resource->GetLookupTable();
+                    lt->entityApi->SetHealth(lt->GetLocalPlayer(), health);
+                });
+            }
+            state->EndClass();
+
+            state->PushObject(resource, "Player");
+            state->RegisterVariable("player");
+
             state->BeginClass("resource");
             {
                 state->MemberVariable("name", +[](lua::Resource* resource){ return resource->m_Resource->name; });

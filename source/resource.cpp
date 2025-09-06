@@ -58,6 +58,7 @@ namespace lua
     }
 
     Resource::Resource(ILookupTable* lookupTable, IResource* resource) :
+        m_LookupTable(lookupTable),
         m_Logger(Logger(lookupTable, std::format("resource {}", resource->name))),
         m_State(State(resource->name)),
         m_Resource(resource)

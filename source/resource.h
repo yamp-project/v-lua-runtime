@@ -24,6 +24,11 @@ namespace lua
         void OnCoreEvent(CoreEventType eventType, CAnyArray* args);
         void OnResourceEvent(const char* eventName, CAnyArray* args);
 
+        ILookupTable* GetLookupTable()
+        {
+            return m_LookupTable;
+        }
+
         State* GetState()
         {
             return &m_State;
@@ -40,6 +45,7 @@ namespace lua
         IResource* m_Resource;
 
     private:
+        ILookupTable* m_LookupTable;
         Logger m_Logger;
         State m_State;
 
