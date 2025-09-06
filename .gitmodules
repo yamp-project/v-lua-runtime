@@ -3,4 +3,4 @@
 	url = git@github.com:luau-lang/luau.git
 [submodule "vendors/yamp-sdk"]
 	path = vendors/yamp-sdk
-	url = git@github.com:yamp-project/sdk-poc.git
+	url = git@github.com:yamp-project/yamp-sdk.git
