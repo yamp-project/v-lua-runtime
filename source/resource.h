@@ -24,11 +24,6 @@ namespace lua
         void OnCoreEvent(CoreEventType eventType, CAnyArray* args);
         void OnResourceEvent(const char* eventName, CAnyArray* args);
 
-        ILookupTable* GetLookupTable()
-        {
-            return m_LookupTable;
-        }
-
         State* GetState()
         {
             return &m_State;
@@ -39,13 +34,12 @@ namespace lua
             return m_State.GetState();
         }
 
-        Resource(ILookupTable* lookupTable, IResource* resource);
+        Resource(SDK_Interface* sdk, SDK_Resource* sdkResource);
         ~Resource() = default;
 
-        IResource* m_Resource;
+        SDK_Resource* m_Resource;
 
     private:
-        ILookupTable* m_LookupTable;
         Logger m_Logger;
         State m_State;
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <yamp-sdk/sdk.h>
 #include <unordered_map>
 #include <assert.h>
 
@@ -11,8 +12,8 @@ namespace lua
     bool Init();
     void Shutdown();
 
-    void OnResourceStart(IResource* iResource);
-    void OnResourceStop(IResource* iResource);
+    void OnResourceStart(SDK_Resource* sdkResource);
+    void OnResourceStop(SDK_Resource* sdkResource);
     void OnTick();
     void OnCoreEvent(CoreEventType eventType, CAnyArray* args);
     void OnResourceEvent(const char* eventName, CAnyArray* args);
@@ -21,21 +22,21 @@ namespace lua
     class Runtime
     {
     public:
+        using Resources = std::unordered_map<SDK_Resource*, std::unique_ptr<Resource>>;
+
         static Runtime* GetInstance();
-        static Runtime* Initialize(ILookupTable* lookupTable);
+        static Runtime* Initialize(SDK_Interface* sdk);
         static void Shutdown();
 
-        using Resources = std::unordered_map<IResource*, std::unique_ptr<Resource>>;
-
-        Runtime(ILookupTable* lookupTable);
+        Runtime(SDK_Interface* sdk);
         ~Runtime() = default;
 
-        ILookupTable* GetLookupTable() { return m_LookupTable; }
+        SDK_Interface* GetSdkInterface() { return m_Sdk; }
         Resources& GetResources() { return m_Resources; }
         Logger& GetLogger() { return m_Logger; }
         
-        Resource* CreateResource(IResource* iResource);
-        Resource* GetResource(IResource* iResource);
+        Resource* CreateResource(SDK_Resource* sdkResource);
+        Resource* GetResource(SDK_Resource* sdkResource);
         Resource* GetResource(lua_State* state);
 
         std::optional<CoreEventType> GetCoreEventType(const char* eventName);
@@ -43,7 +44,7 @@ namespace lua
     private:
         static std::unique_ptr<Runtime> s_Runtime;
 
-        ILookupTable* m_LookupTable;
+        SDK_Interface* m_Sdk;
         Resources m_Resources;
         Logger m_Logger;
 

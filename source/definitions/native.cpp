@@ -52,14 +52,12 @@ T* CreatePtr(size_t additionalSize = 1)
 template <typename T>
 inline void PushArgumentAsType(CNativeInvoker* nativeInvoker, T&& Value)
 {
-    auto lookupTable = lua::Runtime::GetInstance()->GetLookupTable();
-    lookupTable->nativesFactory->PushArgumentFromBuffer(nativeInvoker, &Value, sizeof(T));
+    auto sdk = lua::Runtime::GetInstance()->GetSdkInterface();
+    sdk->nativesFactory->PushArgumentFromBuffer(nativeInvoker, &Value, sizeof(T));
 }
 
 void PushArg(CNativeInvoker* nativeInvoker, lua_State* L, int idx, CNativeValueType type)
 {
-    auto lookupTable = lua::Runtime::GetInstance()->GetLookupTable();
-
     int luaType = lua_type(L, idx);
     switch (luaType)
     {
@@ -87,7 +85,7 @@ void PushArg(CNativeInvoker* nativeInvoker, lua_State* L, int idx, CNativeValueT
 
 ArgPtr PushArgPtr(CNativeInvoker* nativeInvoker, lua_State* L, int idx, CNativeValueType type)
 {
-    auto lookupTable = lua::Runtime::GetInstance()->GetLookupTable();
+    auto sdk = lua::Runtime::GetInstance()->GetSdkInterface();
     void* buffer = nullptr;
 
     switch (type)
@@ -102,12 +100,12 @@ ArgPtr PushArgPtr(CNativeInvoker* nativeInvoker, lua_State* L, int idx, CNativeV
 
     switch (type)
     {
-        case CNativeValueType::BOOL_TYPE: lookupTable->nativesFactory->PushArgumentFromBuffer(nativeInvoker, (bool*)&buffer, sizeof(bool*)); break;
-        case CNativeValueType::FLOAT_TYPE: lookupTable->nativesFactory->PushArgumentFromBuffer(nativeInvoker, (float*)&buffer, sizeof(float*)); break;
-        case CNativeValueType::INT_TYPE: lookupTable->nativesFactory->PushArgumentFromBuffer(nativeInvoker, (int*)&buffer, sizeof(int*)); break;
-        case CNativeValueType::UINT_TYPE: lookupTable->nativesFactory->PushArgumentFromBuffer(nativeInvoker, (unsigned int*)&buffer, sizeof(unsigned int*)); break;
-        case CNativeValueType::VECTOR_TYPE: lookupTable->nativesFactory->PushArgumentFromBuffer(nativeInvoker, (NVector32*)&buffer, sizeof(NVector32*)); break;
-        case CNativeValueType::STRING_TYPE: lookupTable->nativesFactory->PushArgumentFromBuffer(nativeInvoker, (char*)&buffer, sizeof(char*)); break;
+        case CNativeValueType::BOOL_TYPE: sdk->nativesFactory->PushArgumentFromBuffer(nativeInvoker, (bool*)&buffer, sizeof(bool*)); break;
+        case CNativeValueType::FLOAT_TYPE: sdk->nativesFactory->PushArgumentFromBuffer(nativeInvoker, (float*)&buffer, sizeof(float*)); break;
+        case CNativeValueType::INT_TYPE: sdk->nativesFactory->PushArgumentFromBuffer(nativeInvoker, (int*)&buffer, sizeof(int*)); break;
+        case CNativeValueType::UINT_TYPE: sdk->nativesFactory->PushArgumentFromBuffer(nativeInvoker, (unsigned int*)&buffer, sizeof(unsigned int*)); break;
+        case CNativeValueType::VECTOR_TYPE: sdk->nativesFactory->PushArgumentFromBuffer(nativeInvoker, (NVector32*)&buffer, sizeof(NVector32*)); break;
+        case CNativeValueType::STRING_TYPE: sdk->nativesFactory->PushArgumentFromBuffer(nativeInvoker, (char*)&buffer, sizeof(char*)); break;
     }
 
     return ArgPtr{ buffer, type };
@@ -115,18 +113,17 @@ ArgPtr PushArgPtr(CNativeInvoker* nativeInvoker, lua_State* L, int idx, CNativeV
 
 void PushValue(CNativeInvoker* nativeInvoker, lua_State* L, CNativeValueType type)
 {
-
-    auto lookupTable = lua::Runtime::GetInstance()->GetLookupTable();
+    auto sdk = lua::Runtime::GetInstance()->GetSdkInterface();
     switch (type)
     {
-        case CNativeValueType::BOOL_TYPE: lua_pushboolean(L, *(bool*)lookupTable->nativesFactory->GetReturnValueBuffer(nativeInvoker)); break;
-        case CNativeValueType::FLOAT_TYPE: lua_pushnumber(L, *(float*)lookupTable->nativesFactory->GetReturnValueBuffer(nativeInvoker)); break;
-        case CNativeValueType::INT_TYPE: lua_pushinteger(L, (*(int*)lookupTable->nativesFactory->GetReturnValueBuffer(nativeInvoker))); break;
-        case CNativeValueType::UINT_TYPE: lua_pushunsigned(L, *(uint32_t*)lookupTable->nativesFactory->GetReturnValueBuffer(nativeInvoker)); break;
-        case CNativeValueType::STRING_TYPE: lua_pushstring(L, *(const char**)lookupTable->nativesFactory->GetReturnValueBuffer(nativeInvoker)); break;
+        case CNativeValueType::BOOL_TYPE: lua_pushboolean(L, *(bool*)sdk->nativesFactory->GetReturnValueBuffer(nativeInvoker)); break;
+        case CNativeValueType::FLOAT_TYPE: lua_pushnumber(L, *(float*)sdk->nativesFactory->GetReturnValueBuffer(nativeInvoker)); break;
+        case CNativeValueType::INT_TYPE: lua_pushinteger(L, (*(int*)sdk->nativesFactory->GetReturnValueBuffer(nativeInvoker))); break;
+        case CNativeValueType::UINT_TYPE: lua_pushunsigned(L, *(uint32_t*)sdk->nativesFactory->GetReturnValueBuffer(nativeInvoker)); break;
+        case CNativeValueType::STRING_TYPE: lua_pushstring(L, *(const char**)sdk->nativesFactory->GetReturnValueBuffer(nativeInvoker)); break;
         case CNativeValueType::VECTOR_TYPE:
         {
-            NVector32 vector = *(NVector32*)lookupTable->nativesFactory->GetReturnValueBuffer(nativeInvoker);
+            NVector32 vector = *(NVector32*)sdk->nativesFactory->GetReturnValueBuffer(nativeInvoker);
             lua_pushvector(L, vector.x, vector.y, vector.z);
             break;
         }
@@ -135,7 +132,6 @@ void PushValue(CNativeInvoker* nativeInvoker, lua_State* L, CNativeValueType typ
 
 void PushValuePtr(CNativeInvoker* nativeInvoker, lua_State* L, CNativeValueType type, void* buffer)
 {
-    auto lookupTable = lua::Runtime::GetInstance()->GetLookupTable();
     switch (type)
     {
         case CNativeValueType::BOOL_TYPE: lua_pushboolean(L, *(bool*)buffer); break;
@@ -160,13 +156,13 @@ int InvokeNative(lua_State* L)
 
     //uint64_t nativeHash = (uint64_t(hi) << 32) | lo;
 
-    auto lookupTable = lua::Runtime::GetInstance()->GetLookupTable();
-    CNativeInvoker* invokerFactory = lookupTable->nativesFactory->CreateInvoker();
+    auto sdk = lua::Runtime::GetInstance()->GetSdkInterface();
+    CNativeInvoker* invokerFactory = sdk->nativesFactory->CreateInvoker();
 
     std::vector<ArgPtr> m_ReturnPointers;
     if (invokerFactory)
     {
-        lookupTable->nativesFactory->Begin(invokerFactory, nativeInformation->m_Hash);
+        sdk->nativesFactory->Begin(invokerFactory, nativeInformation->m_Hash);
 
         int ptrArgumentCount = std::count_if(
                 nativeInformation->m_ParameterValueArrayData,
@@ -201,7 +197,7 @@ int InvokeNative(lua_State* L)
                 m_ReturnPointers.push_back(PushArgPtr(invokerFactory, L, x, nativeParameter.m_Type));
         }
 
-        lookupTable->nativesFactory->Call(invokerFactory);
+        sdk->nativesFactory->Call(invokerFactory);
         //if (nativeInformation->m_ReturnValue.m_Type != sdk::NativeValueType::Void)
         {
             PushValue(invokerFactory, L, nativeInformation->m_ReturnValue.m_Type);
@@ -222,20 +218,20 @@ int InvokeNative(lua_State* L)
 static lua::StaticDefinition natives([](lua::Resource* resource)
 {
     auto state = resource->GetState();
-    auto lookupTable = lua::Runtime::GetInstance()->GetLookupTable();
+    auto sdk = lua::Runtime::GetInstance()->GetSdkInterface();
 
     state->GetGlobalNamespace();
     {
         state->BeginNamespace("native");
         {
-            auto nativeReflection = lookupTable->nativesFactory->CreateReflection();
+            auto nativeReflection = sdk->nativesFactory->CreateReflection();
             int32_t nativeSize;
 
             uint64_t* nativeData = nullptr;
-            lookupTable->nativesFactory->GetListOfNatives(nativeReflection, &nativeData, &nativeSize);
+            sdk->nativesFactory->GetListOfNatives(nativeReflection, &nativeData, &nativeSize);
             for(int i = 0; i < nativeSize; i++)
             {
-                CNativeInformation* nativeInformation = lookupTable->nativesFactory->GetNativeInformation(nativeReflection, nativeData[i]);
+                CNativeInformation* nativeInformation = sdk->nativesFactory->GetNativeInformation(nativeReflection, nativeData[i]);
                 if (nativeInformation == nullptr)
                     continue;
 

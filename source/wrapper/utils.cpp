@@ -1,8 +1,5 @@
 #include "utils.h"
 
-#include <yamp-sdk/sdk.h>
-#include <yamp-sdk/cpp/any_value.h>
-
 #include <lua.h>
 #include <lualib.h>
 #include <assert.h>
@@ -217,7 +214,7 @@ void lua::utils::PushAnyValueToStack(lua_State* L, CAnyValue* value)
     }
 }
 
-CAnyValue* lua::utils::MakeAnyValue(AnyValueFactory* valueFactory, lua_State *L, int32_t index)
+CAnyValue* lua::utils::MakeAnyValue(SDK_AnyValueFactory* valueFactory, lua_State *L, int32_t index)
 {
     switch (lua_type(L, index))
     {

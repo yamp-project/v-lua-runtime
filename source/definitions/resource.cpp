@@ -52,18 +52,18 @@ int32_t RegisterCoreEvent(lua_State* L) {
 
     static int32_t C_Emit(lua_State *L) {
         lua::Runtime* runtime = lua::Runtime::GetInstance();
-        ILookupTable* lookupTable = runtime->GetLookupTable();
+        SDK_Interface* sdk = runtime->GetSdkInterface();
         lua::Resource* resource = runtime->GetResource(L);
         const char* eventName = lua_tostring(L, 1);
 
         int n = lua_gettop(L); // number of arguments
-        CAnyArray* array = lookupTable->valueFactory->MakeAnyArrayValue(n);
+        CAnyArray* array = sdk->anyValueFactory->MakeAnyArrayValue(n);
 
         for (int i = 2; i <= n; i++) {
-            array->buffer[i] = lua::utils::MakeAnyValue(lookupTable->valueFactory, L, i);
+            array->buffer[i] = lua::utils::MakeAnyValue(sdk->anyValueFactory, L, i);
         }
 
-        //lookupTable->EmitResourceEvent(eventName, array);
+        // sdk->nativesFactory->EmitResourceEvent(eventName, array);
         return 0;
     }
 
@@ -95,11 +95,11 @@ static lua::StaticDefinition resourceClass([](lua::Resource* resource)
             state->BeginClass("Player");
             {
                 state->MemberVariable("health", +[](lua::Resource* resource) {
-                    auto lt = resource->GetLookupTable();
-                    return lt->entityApi->GetHealth(lt->GetLocalPlayer());
+                    auto sdk = lua::Runtime::GetInstance()->GetSdkInterface();
+                    return sdk->entityApi->GetHealth(sdk->GetLocalPlayer());
                 }, +[](lua::Resource* resource, float health) {
-                    auto lt = resource->GetLookupTable();
-                    lt->entityApi->SetHealth(lt->GetLocalPlayer(), health);
+                    auto sdk = lua::Runtime::GetInstance()->GetSdkInterface();
+                    sdk->entityApi->SetHealth(sdk->GetLocalPlayer(), health);
                 });
             }
             state->EndClass();

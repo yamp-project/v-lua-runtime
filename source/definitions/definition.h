@@ -3,7 +3,7 @@
 #include <vector>
 #include <functional>
 
-#include <yamp-sdk/lookup_table.h>
+#include <yamp-sdk/sdk.h>
 
 namespace lua
 {

@@ -57,11 +57,10 @@ namespace lua
         }
     }
 
-    Resource::Resource(ILookupTable* lookupTable, IResource* resource) :
-        m_LookupTable(lookupTable),
-        m_Logger(Logger(lookupTable, std::format("resource {}", resource->name))),
-        m_State(State(resource->name)),
-        m_Resource(resource)
+    Resource::Resource(SDK_Interface* sdk, SDK_Resource* sdkResource) :
+        m_Logger(Logger(sdk, std::format("resource {}", sdkResource->name))),
+        m_State(State(sdkResource->name)),
+        m_Resource(sdkResource)
     {
         //RegisterDefinition<lua::Definitions::Native>();
     }

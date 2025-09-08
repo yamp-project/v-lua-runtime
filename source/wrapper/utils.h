@@ -1,10 +1,9 @@
 #pragma once
-#include <assert.h>
 
-struct AnyValueFactory;
 struct lua_State;
-struct CAnyValue;
 
+#include <yamp-sdk/sdk.h>
+#include <assert.h>
 #include <cstdint>
 
 namespace lua::utils
@@ -15,5 +14,5 @@ namespace lua::utils
 
     int traceback(lua_State* L);
     void PushAnyValueToStack(lua_State* L, CAnyValue* value);
-    CAnyValue* MakeAnyValue(AnyValueFactory* valueFactory, lua_State *L, int32_t index);
+    CAnyValue* MakeAnyValue(SDK_AnyValueFactory* valueFactory, lua_State *L, int32_t index);
 }

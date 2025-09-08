@@ -10,19 +10,19 @@
     template <typename... Args>                                                                                                             \
     void name(std::string_view fmt, Args&&... args)                                                                                         \
     {                                                                                                                                       \
-        m_LookupTable->Log##name(m_Prefix.empty() ? fmt.data() : std::format("{} {}", m_Prefix, fmt).c_str(), std::forward<Args>(args)...); \
+        m_Sdk->Log##name(m_Prefix.empty() ? fmt.data() : std::format("{} {}", m_Prefix, fmt).c_str(), std::forward<Args>(args)...); \
     }
 
 class Logger
 {
 public:
 
-    Logger(ILookupTable* lookupTable): m_LookupTable(lookupTable)
+    Logger(SDK_Interface* sdk): m_Sdk(sdk)
     {
         //
     }
 
-    Logger(ILookupTable* lookupTable, const std::string& prefix): m_LookupTable(lookupTable), m_Prefix(prefix)
+    Logger(SDK_Interface* sdk, const std::string& prefix): m_Sdk(sdk), m_Prefix(prefix)
     {
         //
     }
@@ -33,6 +33,6 @@ public:
     IMPLEMENT_LOG(Error);
 
 private:
-    ILookupTable* m_LookupTable;
+    SDK_Interface* m_Sdk;
     std::string m_Prefix;
 };

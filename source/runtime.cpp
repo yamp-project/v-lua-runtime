@@ -2,8 +2,6 @@
 #include "resource.h"
 #include "utils.h"
 
-#include <yamp-sdk/cpp/any_value.h>
-
 namespace lua
 {
     bool Init()
@@ -17,24 +15,24 @@ namespace lua
         Runtime::GetInstance()->GetLogger().Info("Runtime::Shutdown");
     }
     
-    void OnResourceStart(IResource* iResource)
+    void OnResourceStart(SDK_Resource* sdkResource)
     {
         Runtime* runtime = Runtime::GetInstance();
-        if (Resource* resource = runtime->GetResource(iResource); resource)
+        if (Resource* resource = runtime->GetResource(sdkResource); resource)
         {
             resource->OnStart();
             return;    
         }
 
-        Resource* resource = runtime->CreateResource(iResource);
+        Resource* resource = runtime->CreateResource(sdkResource);
         resource->OnStart();
 
-        runtime->GetLogger().Debug("Runtime::OnResourceStart - %s", iResource->name);
+        runtime->GetLogger().Debug("Runtime::OnResourceStart - %s", sdkResource->name);
     }
-    
-    void OnResourceStop(IResource* iResource)
+
+    void OnResourceStop(SDK_Resource* sdkResource)
     {
-        Runtime::GetInstance()->GetLogger().Debug("Runtime::OnResourceStop");
+        Runtime::GetInstance()->GetLogger().Debug("Runtime::OnResourceStop - %s", sdkResource->name);
     }
 
     void OnTick()
@@ -72,10 +70,10 @@ namespace lua
         return s_Runtime.get();
     }
 
-    Runtime* Runtime::Initialize(ILookupTable* lookupTable)
+    Runtime* Runtime::Initialize(SDK_Interface* sdk)
     {
         assert(s_Runtime == nullptr);
-        s_Runtime = std::make_unique<Runtime>(lookupTable);
+        s_Runtime = std::make_unique<Runtime>(sdk);
 
         // CoreEventMetas eventMetas = s_Runtime->GetLookupTable()->GetCoreEventMetas();
         // printf("Runtime::Initialize2.1\n");
@@ -94,28 +92,28 @@ namespace lua
         s_Runtime.reset();
     }
 
-    Runtime::Runtime(ILookupTable* lookupTable) :
-        m_LookupTable(lookupTable),
-        m_Logger(Logger(lookupTable, "lua")),
+    Runtime::Runtime(SDK_Interface* sdk) :
+        m_Sdk(sdk),
+        m_Logger(Logger(sdk, "lua")),
         m_Resources()
     {
         //
     }
 
-    Resource* Runtime::CreateResource(IResource* iResource)
+    Resource* Runtime::CreateResource(SDK_Resource* sdkResource)
     {
-        auto resourcePtr = std::make_unique<Resource>(m_LookupTable, iResource);
+        auto resourcePtr = std::make_unique<Resource>(m_Sdk, sdkResource);
         Resource* resource = resourcePtr.get();
 
-        m_Resources[iResource] = std::move(resourcePtr);
+        m_Resources[sdkResource] = std::move(resourcePtr);
         m_ResourceMapping[resource->GetLuaState()] = resource;
 
         return resource;
     }
 
-    Resource* Runtime::GetResource(IResource* iResource)
+    Resource* Runtime::GetResource(SDK_Resource* sdkResource)
     {
-        auto it = m_Resources.find(iResource);
+        auto it = m_Resources.find(sdkResource);
         if (it != m_Resources.end())
         {
             return it->second.get();

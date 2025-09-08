@@ -1,7 +1,7 @@
 #include <yamp-sdk/sdk.h>
 #include "runtime.h"
 
-IRuntimeContext GetRuntimeContext()
+SDK_Context GetRuntimeContext()
 {
     return {
         .version    = "0.0.1",
@@ -22,7 +22,6 @@ IRuntimeContext GetRuntimeContext()
 
 SDK_EXPORT void RuntimeEntry(RegisterRuntime registerRuntime)
 {
-    printf("HHHKAJSHDKAJSHDKJAHSDKJAHSKJD3333333\n");
     lua::Runtime* runtime = lua::Runtime::Initialize(registerRuntime("lua", GetRuntimeContext()));
     runtime->GetLogger().Info("runtime registered with success!");
 }
