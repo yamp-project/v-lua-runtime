@@ -55,6 +55,24 @@ namespace lua
         }
     };
 
+    template<typename UInteger> requires std::is_integral<UInteger>::value && std::is_unsigned<UInteger>::value
+    struct Value<UInteger>
+    {
+        static inline std::optional<UInteger> Read(lua_State* state, int index)
+        {
+            CHECK_TYPE_AND_INDEX(state, LUA_TNUMBER, index);
+
+            int temp;
+            UInteger result = static_cast<UInteger>(lua_tounsignedx(state, index, &temp));
+            return (temp == 1) ? std::make_optional(result) : std::nullopt;
+        }
+
+        static inline void Push(lua_State* state, UInteger value)
+        {
+            lua_pushunsigned(state, value);
+        }
+    };
+
     template<typename Float> requires std::is_floating_point<Float>::value
     struct Value<Float>
     {
