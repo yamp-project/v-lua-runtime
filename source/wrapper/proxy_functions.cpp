@@ -22,7 +22,7 @@ int lua::Proxy::CApiClassIndex(lua_State* L)
     lua_rawget(L, -2);
 
     //we found a function
-    if (lua_iscfunction(L, -1))
+    if (!lua_isnil(L, -1))
     {
         //return the function only from the stack
         return 1;
