@@ -25,7 +25,6 @@ namespace lua
         }
 
         inline static std::vector<StaticDefinition*> m_Definitions;
-
         DefinitionCallback m_Callback = nullptr;
     };
 }

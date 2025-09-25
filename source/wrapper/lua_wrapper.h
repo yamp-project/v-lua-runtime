@@ -38,12 +38,6 @@ namespace lua
             lua_getglobal(m_State, "_G");
         }
 
-//        Namespace GetNamespace(const char* namespaceName)
-//        {
-//            GetGlobalNamespace();
-//            return Namespace(m_State, namespaceName, nullptr);
-//        }
-
         void BeginClass(std::string className)
         {
             lua_pushstring(m_State, className.c_str());
@@ -88,8 +82,7 @@ namespace lua
         }
 
         template<typename ReturnType, typename ClassType>
-        void MemberVariable(std::string variableName, ReturnType(*getter)(ClassType*), void(*setter)(ClassType*,ReturnType) = nullptr)
-        {
+        void Getter(std::string variableName, ReturnType(*getter)(ClassType*)) {
             lua_rawgetfield(m_State, -1, "__get");
 
             std::string& classMetaTableName =  m_ClassMetaTableQueue.back();
@@ -99,23 +92,20 @@ namespace lua
             lua_setfield(m_State, -2, variableName.c_str());
 
             lua_pop(m_State, 1);
+        }
 
-            if (setter)
-            {
-                utils::lua_stacktrace(m_State, "MemberVariable::Setter");
+        template<typename ReturnType, typename ClassType>
+        void Setter(std::string variableName, void(*setter)(ClassType*, ReturnType))
+        {
+            lua_rawgetfield(m_State, -1, "__set");
 
-                lua_rawgetfield(m_State, -1, "__set");
+            std::string& classMetaTableName =  m_ClassMetaTableQueue.back();
+            lua_pushstring(m_State, classMetaTableName.c_str());
+            lua_pushlightuserdata(m_State, setter);
+            lua_pushcclosurek(m_State, Proxy::CApiClassMemberVariableSetter<ReturnType, ClassType>, "__get", 2, NULL);
+            lua_setfield(m_State, -2, variableName.c_str());
 
-                std::string& classMetaTableName =  m_ClassMetaTableQueue.back();
-                lua_pushstring(m_State, classMetaTableName.c_str());
-                lua_pushlightuserdata(m_State, setter);
-                lua_pushcclosurek(m_State, Proxy::CApiClassMemberVariableSetter<ReturnType, ClassType>, "__get", 2, NULL);
-                lua_setfield(m_State, -2, variableName.c_str());
-
-                lua_pop(m_State, 1);
-            }
-
-//            return *this;
+            lua_pop(m_State, 1);
         }
 
         template<typename ReturnType, typename ClassType, typename... Args>
@@ -126,10 +116,6 @@ namespace lua
             lua_pushlightuserdata(m_State, function);
             lua_pushcclosurek(m_State, Proxy::CApiClassMemberFunction<ReturnType, ClassType, Args...>, _strdup(functionName.c_str()), 2, NULL);
             lua_setfield(m_State, -2, functionName.c_str());
-
-            //m_Functions.push_back({ _strdup(functionName.c_str()), Proxy::CApiClassMemberFunction<Function> });
-
-//            return *this;
         }
 
         void EndClass()
@@ -153,23 +139,21 @@ namespace lua
             {
                 lua_getfield(m_State, -1, namespaceName.c_str());
 
-                //if namespace was already registered the result will be on top of the stack
+                // if namespace was already registered the result will be on top of the stack
                 if (lua_istable(m_State, -1))
                     return;
 
-                //pop the nil result and create an empty table
+                // pop the nil result and create an empty table
                 lua_pop(m_State, 1);
                 lua_newtable(m_State);
 
                 m_NamespaceQueue.push_back(namespaceName);
-                //m_Name = namespaceName;
-                //m_ParentNamespace = parent;
             }
         }
 
         void EndNamespace()
         {
-            //handle global namespace is on the stack (hopefully)
+            // handle global namespace is on the stack (hopefully)
             if(lua_gettop(m_State) == 1)
             {
                 lua_pop(m_State, 1);
