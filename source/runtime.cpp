@@ -37,7 +37,10 @@ namespace lua
 
     void OnTick()
     {
-        //
+        for (const auto& it : Runtime::GetInstance()->GetResources())
+        {
+            it.second->OnTick();
+        }
     }
 
     void OnCoreEvent(CoreEventType eventType, CAnyArray* args)
