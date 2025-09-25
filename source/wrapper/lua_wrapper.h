@@ -120,7 +120,6 @@ namespace lua
 
         void EndClass()
         {
-
             lua_setmetatable(m_State, -2);
 
             if (lua_istable(m_State, -3))
@@ -239,14 +238,7 @@ namespace lua
             //utils::lua_stacktrace(m_State, "PushObject");
             lua_setmetatable(m_State, -2);
             //utils::lua_stacktrace(m_State, "PushObject2");
-            printf("Pushing pointer value\n");
         }
-
-//        template<typename T>
-//        void Push(T& value)
-//        {
-//            Value<T>::Push(m_State, std::forward<T&>(value));
-//        }
 
     private:
         std::string m_ResourceName = "";
