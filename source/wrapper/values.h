@@ -37,7 +37,7 @@ namespace lua
         };
     };
 
-    template<typename Integer> requires std::is_integral<Integer>::value
+    template<typename Integer> requires std::is_integral<Integer>::value && std::is_signed<Integer>::value
     struct Value<Integer>
     {
         static inline std::optional<Integer> Read(lua_State* state, int index)
