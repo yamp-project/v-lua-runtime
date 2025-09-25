@@ -131,7 +131,7 @@ namespace lua
     {
         static inline std::optional<bool> Read(lua_State* state, int index)
         {
-            CHECK_TYPE_AND_INDEX(state, LUA_TNUMBER, index);
+            CHECK_TYPE_AND_INDEX(state, LUA_TBOOLEAN, index);
 
             return lua_toboolean(state, index);
         }
