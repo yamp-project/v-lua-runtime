@@ -1,10 +1,12 @@
 #include <wrapper/lua_wrapper.h>
+#include <Luau/Compiler.h>
 
 #include <iostream>
 #include <fstream>
 #include <filesystem>
 
 using namespace lua;
+
 State::State(std::string resourceName)
 {
     m_ResourceName = resourceName;
@@ -15,17 +17,17 @@ State::State(std::string resourceName)
 
 State::~State()
 {
+    lua_close(m_State);
+    m_State = nullptr;
 
+    m_NamespaceQueue.clear();
+    m_ClassMetaTableQueue.clear();
 }
 
 int Call(lua_State* L)
 {
-    printf("FUCKING CALL!!!!!!\n");
-
     return 0;
 }
-
-#include <Luau/Compiler.h>
 
 void State::RunFile(std::string filePathStr, std::string relativePathStr)
 {
@@ -44,14 +46,11 @@ void State::RunFile(std::string filePathStr, std::string relativePathStr)
     std::ifstream mainFileStream(filePath);
 
     std::string content((std::istreambuf_iterator<char>(mainFileStream)), (std::istreambuf_iterator<char>()));
-    printf("Content: %lld\n%s\n", content.size(), content.c_str());
-
     size_t bytecodeSize = 0;
 
     std::string bytecode = Luau::compile(content);
     int result = luau_load(m_State, std::format("@{}:{}", m_ResourceName, relativePath.string()).c_str(), bytecode.c_str(), bytecodeSize, 0);
     bool error = (bool)result;
-
     if(!error)
     {
         auto status = lua_resume(m_State, NULL, 0);
@@ -68,8 +67,4 @@ void State::RunFile(std::string filePathStr, std::string relativePathStr)
             printf("Error happened while running: %s\n", str);
         }
     }
-
-    printf("Result: %d\n", result);
-    // m_Logger->Info("Result: %d", result);
-    // lua_close(m_State);
 }

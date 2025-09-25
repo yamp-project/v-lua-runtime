@@ -142,9 +142,9 @@ namespace lua
                 lua_rawset(m_State, -3);
             }
 
-            m_ClassMetaTableQueue.pop_back();
-
-            //return *m_ParentNamespace;
+            if (!m_ClassMetaTableQueue.empty()) {
+                m_ClassMetaTableQueue.pop_back();
+            }
         }
 
         void BeginNamespace(std::string namespaceName)
@@ -177,11 +177,15 @@ namespace lua
 
             if(lua_gettop(m_State) >= 2)
             {
-                std::string currentNamespace = m_NamespaceQueue.back();
-                lua_setfield(m_State, -2, currentNamespace.c_str());
+                if (!m_NamespaceQueue.empty()) {
+                    std::string currentNamespace = m_NamespaceQueue.back();
+                    lua_setfield(m_State, -2, currentNamespace.c_str());
+                }
             }
 
-            m_NamespaceQueue.pop_back();
+            if (!m_NamespaceQueue.empty()) {
+                m_NamespaceQueue.pop_back();
+            }
         }
 
         void RegisterVariable(std::string key)
