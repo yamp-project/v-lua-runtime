@@ -120,7 +120,8 @@ namespace lua
 
     void Resource::OnStop()
     {
-        //
+        m_CoreCallbackRefs.clear();
+        m_CallbackRefs.clear();
     }
 
     void Resource::OnTick()
