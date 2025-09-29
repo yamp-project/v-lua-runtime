@@ -4,12 +4,13 @@
 #include <string>
 
 #include <lua.h>
+#include <lualib.h>
 
 #include <wrapper/type_traits.h>
 #include <wrapper/utils.h>
 
-#define CHECK_TYPE_AND_INDEX(state, type, index) \
-    if(index > lua_gettop(state)) return std::nullopt; \
+#define CHECK_TYPE_AND_INDEX(state, type, index)            \
+    if(index > lua_gettop(state)) return std::nullopt;      \
     if (lua_type(state, index) != type) return std::nullopt
 
 namespace lua
@@ -18,6 +19,14 @@ namespace lua
     {
         uint32_t m_Reference;
         const void* m_Pointer;
+    };
+
+    struct LuaObject
+    {
+        LuaObject(const char* identifier, void* value) : m_Identifier(identifier), m_Value(value) {}
+
+        const char* m_Identifier;
+        void* m_Value;
     };
 
     template<typename T>
@@ -179,6 +188,26 @@ namespace lua
         }
     };
 
+    template<>
+    struct Value<LuaObject>
+    {
+        static inline std::optional<void*> Read(lua_State* state, int index)
+        {
+            return std::nullopt;
+        };
+
+        static inline void Push(lua_State* state, void* value, std::string className)
+        {
+            *static_cast<void**>(lua_newuserdata(state, sizeof(void*))) = value;
+            luaL_getmetatable(state, className.c_str());
+
+            if (!lua_isnil(state, -1))
+            {
+                lua_setmetatable(state, -2);
+            }
+        };
+    };
+
     template<typename ReturnType, typename... Args>
     struct Value<ReturnType(*)(Args...)>
     {
@@ -190,7 +219,6 @@ namespace lua
             int index = 0;
             realFunction(Value<type_t<Args>>::Read(state, sizeof...(Args) - index++)...);
 
-            //printf("Proxy function has been called!\n");
             return 0;
         }
 

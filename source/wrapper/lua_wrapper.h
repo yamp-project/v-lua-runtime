@@ -74,11 +74,10 @@ namespace lua
         {
             std::string& classMetaTableName = m_ClassMetaTableQueue.back();
             lua_pushstring(m_State, classMetaTableName.c_str());
+
             lua_pushlightuserdata(m_State, function);
             lua_pushcclosurek(m_State, Proxy::CApiClassConstructor<ClassType, Args...>, "Constructor", 2, NULL);
             lua_setfield(m_State, -2, "__call");
-
-            //return *this;
         }
 
         template<typename ReturnType, typename ClassType>
@@ -87,6 +86,7 @@ namespace lua
 
             std::string& classMetaTableName =  m_ClassMetaTableQueue.back();
             lua_pushstring(m_State, classMetaTableName.c_str());
+
             lua_pushlightuserdata(m_State, getter);
             lua_pushcclosurek(m_State, Proxy::CApiClassMemberVariableGetter<ReturnType, ClassType>, "__get", 2, NULL);
             lua_setfield(m_State, -2, variableName.c_str());
@@ -101,6 +101,7 @@ namespace lua
 
             std::string& classMetaTableName =  m_ClassMetaTableQueue.back();
             lua_pushstring(m_State, classMetaTableName.c_str());
+
             lua_pushlightuserdata(m_State, setter);
             lua_pushcclosurek(m_State, Proxy::CApiClassMemberVariableSetter<ReturnType, ClassType>, "__get", 2, NULL);
             lua_setfield(m_State, -2, variableName.c_str());
@@ -113,6 +114,7 @@ namespace lua
         {
             std::string& classMetaTableName = m_ClassMetaTableQueue.back();
             lua_pushstring(m_State, classMetaTableName.c_str());
+
             lua_pushlightuserdata(m_State, function);
             lua_pushcclosurek(m_State, Proxy::CApiClassMemberFunction<ReturnType, ClassType, Args...>, _strdup(functionName.c_str()), 2, NULL);
             lua_setfield(m_State, -2, functionName.c_str());
@@ -225,19 +227,9 @@ namespace lua
             Value<T>::Push(m_State, std::forward<T>(value));
         }
 
-        template<typename T>
-        void PushObject(T value, std::string className)
+        void PushObject(void* value, std::string className)
         {
-            //lua_pushlightuserdata(m_State, value);
-            *static_cast<T*>(lua_newuserdata(m_State, sizeof(void*))) = value;
-            luaL_getmetatable(m_State, className.c_str());
-
-            if (lua_isnil(m_State, -1))
-                return;
-
-            //utils::lua_stacktrace(m_State, "PushObject");
-            lua_setmetatable(m_State, -2);
-            //utils::lua_stacktrace(m_State, "PushObject2");
+            Value<LuaObject>::Push(m_State, value, className);
         }
 
     private:

@@ -79,9 +79,18 @@ namespace lua
 
             const char* className = lua_tostring(L, lua_upvalueindex(1));
             GetterFunction getterFunction = (GetterFunction)lua_tolightuserdata(L, lua_upvalueindex(2));
-
             Class* instance = *static_cast<Class**>(luaL_checkudata(L, 1, className));
-            Value<ReturnType>::Push(L, getterFunction(instance));
+
+            if constexpr (std::is_base_of_v<LuaObject, ReturnType>)
+            {
+                auto result = getterFunction(instance);
+                Value<LuaObject>::Push(L, result.m_Value, result.m_Identifier);
+            }
+            else
+            {
+                auto result = getterFunction(instance);
+                Value<ReturnType>::Push(L, result);
+            }
 
             return 1;
         }
