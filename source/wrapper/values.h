@@ -198,6 +198,12 @@ namespace lua
 
         static inline void Push(lua_State* state, void* value, std::string className)
         {
+            if (value == nullptr || className.empty())
+            {
+                lua_pushnil(state);
+                return;
+            }
+
             *static_cast<void**>(lua_newuserdata(state, sizeof(void*))) = value;
             luaL_getmetatable(state, className.c_str());
 
