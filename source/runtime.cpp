@@ -65,6 +65,16 @@ namespace lua
         }
     }
 
+    SDK_ResourceStatistic* OnResourceStatistic(SDK_Resource *sdkResource) {
+        Runtime* runtime = Runtime::GetInstance();
+        if (Resource* resource = runtime->GetResource(sdkResource); resource)
+        {
+            return resource->GetStatistic();
+        }
+
+        return nullptr;
+    }
+
     std::unique_ptr<Runtime> Runtime::s_Runtime = nullptr;
 
     Runtime* Runtime::GetInstance()

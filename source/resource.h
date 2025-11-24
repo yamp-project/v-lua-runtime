@@ -24,6 +24,10 @@ namespace lua
         void OnCoreEvent(CoreEventType eventType, CAnyArray* args);
         void OnResourceEvent(const char* eventName, CAnyArray* args);
 
+        SDK_ResourceStatistic* GetStatistic() {
+            return &m_ResourceStatistic;
+        }
+
         State* GetState()
         {
             return &m_State;
@@ -38,10 +42,10 @@ namespace lua
         ~Resource() = default;
 
         SDK_Resource* m_Resource;
-
     private:
         Logger m_Logger;
         State m_State;
+        SDK_ResourceStatistic m_ResourceStatistic;
 
         std::unordered_map<std::string, std::vector<int32_t>> m_CallbackRefs;
         std::unordered_map<int32_t, std::vector<int32_t>> m_CoreCallbackRefs;

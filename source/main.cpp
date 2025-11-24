@@ -16,7 +16,8 @@ SDK_Context GetRuntimeContext()
         .OnResourceStop  = lua::OnResourceStop,
         .OnTick          = lua::OnTick,
         .OnCoreEvent     = lua::OnCoreEvent,
-        .OnResourceEvent = lua::OnResourceEvent
+        .OnResourceEvent = lua::OnResourceEvent,
+        .OnResourceStatistic = lua::OnResourceStatistic
     };
 }
 

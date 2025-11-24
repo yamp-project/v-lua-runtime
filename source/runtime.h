@@ -17,6 +17,7 @@ namespace lua
     void OnTick();
     void OnCoreEvent(CoreEventType eventType, CAnyArray* args);
     void OnResourceEvent(const char* eventName, CAnyArray* args);
+    SDK_ResourceStatistic* OnResourceStatistic(SDK_Resource * resource);
 
     class Resource;
     class Runtime

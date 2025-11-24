@@ -60,7 +60,8 @@ namespace lua
     Resource::Resource(SDK_Interface* sdk, SDK_Resource* sdkResource) :
         m_Logger(Logger(sdk, std::format("resource {}", sdkResource->name))),
         m_State(State(sdkResource->name)),
-        m_Resource(sdkResource)
+        m_Resource(sdkResource),
+        m_ResourceStatistic{0.5, 46}
     {
         //RegisterDefinition<lua::Definitions::Native>();
     }
