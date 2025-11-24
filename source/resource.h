@@ -24,9 +24,7 @@ namespace lua
         void OnCoreEvent(CoreEventType eventType, CAnyArray* args);
         void OnResourceEvent(const char* eventName, CAnyArray* args);
 
-        SDK_ResourceStatistic* GetStatistic() {
-            return &m_ResourceStatistic;
-        }
+        SDK_ResourceStatistic* GetStatistic();
 
         State* GetState()
         {
@@ -41,7 +39,7 @@ namespace lua
         Resource(SDK_Interface* sdk, SDK_Resource* sdkResource);
         ~Resource() = default;
 
-        SDK_Resource* m_Resource;
+        std::unique_ptr<SDK_Resource> m_Resource;
     private:
         Logger m_Logger;
         State m_State;

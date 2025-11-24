@@ -57,11 +57,17 @@ namespace lua
         }
     }
 
+    SDK_ResourceStatistic* Resource::GetStatistic() {
+        m_ResourceStatistic.memoryUsage = static_cast<float>(m_State.GetMemoryUsage()) / (1024.0f * 1024.0f);
+
+        return &m_ResourceStatistic;
+    }
+
     Resource::Resource(SDK_Interface* sdk, SDK_Resource* sdkResource) :
         m_Logger(Logger(sdk, std::format("resource {}", sdkResource->name))),
         m_State(State(sdkResource->name)),
         m_Resource(sdkResource),
-        m_ResourceStatistic{0.5, 46}
+        m_ResourceStatistic{0, 0}
     {
         //RegisterDefinition<lua::Definitions::Native>();
     }
