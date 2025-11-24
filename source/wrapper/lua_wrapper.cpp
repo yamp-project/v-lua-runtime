@@ -7,11 +7,37 @@
 
 using namespace lua;
 
+extern "C" void* luau_state_allocator(void* ud, void* ptr, size_t osize, size_t nsize) {
+    auto* memory_counter = static_cast<std::atomic<size_t>*>(ud);
+
+    if (nsize == 0) {
+        if (ptr) {
+            memory_counter->fetch_sub(osize);
+            std::free(ptr);
+        }
+        return nullptr;
+    }
+    if (ptr == nullptr) {
+        void* new_ptr = std::malloc(nsize);
+        if (new_ptr) {
+            memory_counter->fetch_add(nsize);
+        }
+        return new_ptr;
+    }
+
+    void* new_ptr = std::realloc(ptr, nsize);
+    if (new_ptr) {
+        memory_counter->fetch_sub(osize);
+        memory_counter->fetch_add(nsize);
+    }
+    return new_ptr;
+}
+
 State::State(std::string resourceName)
 {
     m_ResourceName = resourceName;
     // m_Logger = lua::Logger::Get("lua::State");
-    m_State = luaL_newstate();
+    m_State = lua_newstate(luau_state_allocator, &m_MemoryUsage);
     luaL_openlibs(m_State);
 }
 
@@ -22,6 +48,10 @@ State::~State()
 
     m_NamespaceQueue.clear();
     m_ClassMetaTableQueue.clear();
+}
+
+size_t State::GetMemoryUsage() const {
+    return m_MemoryUsage.load();
 }
 
 int Call(lua_State* L)

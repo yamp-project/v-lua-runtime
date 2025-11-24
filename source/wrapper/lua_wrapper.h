@@ -23,6 +23,8 @@
 
 namespace lua
 {
+    extern "C" void* luau_state_allocator(void* ud, void* ptr, size_t osize, size_t nsize);
+
     class State
     {
     public:
@@ -221,6 +223,8 @@ namespace lua
 
         lua_State* GetState() { return m_State; }
 
+        size_t GetMemoryUsage() const;
+
         template<typename T>
         void Push(T value)
         {
@@ -236,6 +240,8 @@ namespace lua
         std::string m_ResourceName = "";
         lua_State* m_State = nullptr;
         // lua::Logger* m_Logger = nullptr;
+
+        std::atomic<size_t> m_MemoryUsage{0};
 
         std::deque<std::string> m_NamespaceQueue;
         std::deque<std::string> m_ClassMetaTableQueue;
