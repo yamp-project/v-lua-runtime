@@ -1,4 +1,7 @@
 #include "runtime.h"
+
+#include <ranges>
+
 #include "resource.h"
 #include "utils.h"
 
@@ -115,18 +118,23 @@ namespace lua
 
     Resource* Runtime::CreateResource(SDK_Resource* sdkResource)
     {
-        auto resourcePtr = std::make_unique<Resource>(m_Sdk, sdkResource);
-        Resource* resource = resourcePtr.get();
+        const std::string key(sdkResource->path);
 
-        m_Resources[sdkResource] = std::move(resourcePtr);
+        if (m_Resources.contains(key)) {
+            return m_Resources.at(key).get();
+        }
+
+        auto resource = std::make_shared<Resource>(m_Sdk, sdkResource);
+
+        m_Resources[key] = resource;
         m_ResourceMapping[resource->GetLuaState()] = resource;
 
-        return resource;
+        return resource.get();
     }
 
     Resource* Runtime::GetResource(SDK_Resource* sdkResource)
     {
-        auto it = m_Resources.find(sdkResource);
+        auto it = m_Resources.find(sdkResource->path);
         if (it != m_Resources.end())
         {
             return it->second.get();
@@ -140,7 +148,7 @@ namespace lua
         auto it = m_ResourceMapping.find(state);
         if (it != m_ResourceMapping.end())
         {
-            return it->second;
+            return it->second.get();
         }
 
         return nullptr;

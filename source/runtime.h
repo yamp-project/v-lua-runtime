@@ -23,7 +23,7 @@ namespace lua
     class Runtime
     {
     public:
-        using Resources = std::unordered_map<SDK_Resource*, std::unique_ptr<Resource>>;
+        using Resources = std::unordered_map<std::string, std::shared_ptr<Resource>>;
 
         static Runtime* GetInstance();
         static Runtime* Initialize(SDK_Interface* sdk);
@@ -50,6 +50,6 @@ namespace lua
         Logger m_Logger;
 
         std::unordered_map<std::string, CoreEventType> m_CoreEventMapping;
-        std::unordered_map<lua_State*, Resource*> m_ResourceMapping;
+        std::unordered_map<lua_State*, std::shared_ptr<Resource>> m_ResourceMapping;
     };
 }
